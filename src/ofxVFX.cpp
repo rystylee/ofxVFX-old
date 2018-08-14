@@ -35,6 +35,11 @@ void ofxVFX::end()
             mBaseFbo.draw(0, 0, mWidth, mHeight);
             mEffectFbo.end();
             break;
+        case ofxVFXMode::SOBEL:
+            mSobelShader.begin();
+            mSobelShader.setUniformTexture("uBase", mBaseFbo.getTexture(), 0);
+            ofDrawRectangle(0, 0, mWidth, mHeight);
+            break;
         case ofxVFXMode::BLOOM:
             // Brightness Threshold Pass
             mBrightnessThreshFbo.begin();
@@ -111,6 +116,8 @@ void ofxVFX::setupFbos()
 
 void ofxVFX::setupShaders()
 {
+    // Sobel
+    mSobelShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/Sobel/sobel.frag");
     // Bloom
     mBrightnessThreshShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/Bloom/brightnessThresh.frag");
     mBlurShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/Bloom/blur.frag");

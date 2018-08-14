@@ -5,6 +5,7 @@
 enum class ofxVFXMode
 {
     NONE,
+    SOBEL,
     BLOOM,
 };
 
@@ -29,6 +30,9 @@ private:
     
     int mWidth, mHeight;
     ofFbo mBaseFbo, mEffectFbo;
+    
+    // Sobel
+    ofShader mSobelShader;
     
     // Bloom
     ofFbo mBrightnessThreshFbo, mBlurFbo[2], mCompositeFbo;

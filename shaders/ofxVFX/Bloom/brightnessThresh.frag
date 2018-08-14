@@ -2,7 +2,6 @@
 precision mediump float;
 
 in vec4 vColor;
-in vec3 vNormal;
 in vec2 vTexCoord;
 
 out vec4 fragColor;
