@@ -1,7 +1,7 @@
 #include "ofxVFX.h"
 
 ofxVFX::ofxVFX()
-: mMode(ofxVFXMode::NONE)
+: mMode(ofxVFXMode::NONE), mAttenuation(1.0), mOffsetScale(1.0)
 {}
 
 void ofxVFX::setup(const int w, const int h)
@@ -55,8 +55,8 @@ void ofxVFX::end()
             ofClear(0, 0);
             mBlurShader.begin();
             mBlurShader.setUniform1i("uDirection", 0);
-            mBlurShader.setUniform1f("uOffsetScale", 1.0);
-            mBlurShader.setUniform1f("uAttenuation", 1.0);
+            mBlurShader.setUniform1f("uOffsetScale", mOffsetScale);
+            mBlurShader.setUniform1f("uAttenuation", mAttenuation);
             mBrightnessThreshFbo.draw(0, 0, mWidth, mHeight);
             mBlurShader.end();
             mBlurFbo[0].end();
@@ -66,8 +66,8 @@ void ofxVFX::end()
             ofClear(0, 0);
             mBlurShader.begin();
             mBlurShader.setUniform1i("uDirection", 1);
-            mBlurShader.setUniform1f("uOffsetScale", 1.0);
-            mBlurShader.setUniform1f("uAttenuation", 1.0);
+            mBlurShader.setUniform1f("uOffsetScale", mOffsetScale);
+            mBlurShader.setUniform1f("uAttenuation", mAttenuation);
             mBlurFbo[0].draw(0, 0, mWidth, mHeight);
             mBlurShader.end();
             mBlurFbo[1].end();

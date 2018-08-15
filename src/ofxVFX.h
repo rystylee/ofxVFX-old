@@ -21,6 +21,8 @@ public:
     
     // Setter
     inline void setVFXMode(const ofxVFXMode mode) { mMode = mode; }
+    inline void setBloomAttenuation(const float attenuation) { mAttenuation = attenuation; }
+    inline void setBloomOffsetScale(const float offsetScale) { mOffsetScale = offsetScale; }
     
 private:
     void setupFbos();
@@ -37,4 +39,5 @@ private:
     // Bloom
     ofFbo mBrightnessThreshFbo, mBlurFbo[2], mCompositeFbo;
     ofShader mBrightnessThreshShader, mBlurShader, mCompositeShader;
+    float mAttenuation, mOffsetScale;
 };
