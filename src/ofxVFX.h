@@ -10,6 +10,7 @@ enum class ofxVFXMode
     CRT,
     SOBEL,
     SYMMETRY,
+    STREAK,
 };
 
 class ofxVFX
@@ -36,6 +37,8 @@ private:
     int mWidth, mHeight;
     ofFbo mBaseFbo, mEffectFbo;
     
+    float mTime;
+    
     // Bloom
     ofFbo mBrightnessThreshFbo, mBlurFbo[2], mCompositeFbo;
     ofxAutoReloadedShader mBrightnessThreshShader, mBlurShader, mCompositeShader;
@@ -49,4 +52,7 @@ private:
     
     // Symmetry
     ofxAutoReloadedShader mSymmetryShader;
+    
+    // Streak
+    ofxAutoReloadedShader mStreakShader;
 };

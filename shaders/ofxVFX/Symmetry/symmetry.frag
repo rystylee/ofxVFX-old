@@ -11,10 +11,6 @@ uniform vec2 uResolution;
 // 0 == verticel, 1 == horizon1tal
 const int direction = 1;
 
-// ------------------------------------------------------
-// https://www.shadertoy.com/view/Xdf3Rf
-// ------------------------------------------------------
-
 void main()
 {
     vec2 uv = vPosition.xy;

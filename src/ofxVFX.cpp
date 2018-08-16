@@ -13,7 +13,7 @@ void ofxVFX::setup(const int w, const int h)
 
 void ofxVFX::update(const float t)
 {
-    
+    mTime = t;
 }
 
 void ofxVFX::begin()
@@ -103,6 +103,13 @@ void ofxVFX::end()
             ofDrawRectangle(0, 0, mWidth, mHeight);
             mSymmetryShader.end();
             break;
+        case ofxVFXMode::STREAK:
+            mStreakShader.begin();
+            mStreakShader.setUniformTexture("uBase", mBaseFbo.getTexture(), 0);
+            mStreakShader.setUniform1f("uTime", mTime);
+            ofDrawRectangle(0, 0, mWidth, mHeight);
+            mStreakShader.end();
+            break;
         default:
             break;
     }
@@ -130,14 +137,16 @@ void ofxVFX::setupFbos()
 
 void ofxVFX::setupShaders()
 {
+    // Bloom
+    mBrightnessThreshShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/Bloom/brightnessThresh.frag", "");
+    mBlurShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/Bloom/blur.frag", "");
+    mCompositeShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/Bloom/composite.frag", "");
     // CRT
     mCRTShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/CRT/CRT.frag", "");
     // Sobel
     mSobelShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/Sobel/sobel.frag", "");
     // Symmetry
     mSymmetryShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/Symmetry/symmetry.frag", "");
-    // Bloom
-    mBrightnessThreshShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/Bloom/brightnessThresh.frag", "");
-    mBlurShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/Bloom/blur.frag", "");
-    mCompositeShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/Bloom/composite.frag", "");
+    // Streak
+    mStreakShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/Streak/streak.frag", "");
 }
