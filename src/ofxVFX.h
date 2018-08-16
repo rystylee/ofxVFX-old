@@ -1,12 +1,15 @@
 #pragma once
 
 #include "ofMain.h"
+#include "ofxAutoReloadedShader.h"
 
 enum class ofxVFXMode
 {
     NONE,
-    SOBEL,
     BLOOM,
+    CRT,
+    SOBEL,
+    SYMMETRY,
 };
 
 class ofxVFX
@@ -33,11 +36,17 @@ private:
     int mWidth, mHeight;
     ofFbo mBaseFbo, mEffectFbo;
     
-    // Sobel
-    ofShader mSobelShader;
-    
     // Bloom
     ofFbo mBrightnessThreshFbo, mBlurFbo[2], mCompositeFbo;
-    ofShader mBrightnessThreshShader, mBlurShader, mCompositeShader;
+    ofxAutoReloadedShader mBrightnessThreshShader, mBlurShader, mCompositeShader;
     float mAttenuation, mOffsetScale;
+    
+    // CRT
+    ofxAutoReloadedShader mCRTShader;
+    
+    // Sobel
+    ofxAutoReloadedShader mSobelShader;
+    
+    // Symmetry
+    ofxAutoReloadedShader mSymmetryShader;
 };

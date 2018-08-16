@@ -35,11 +35,6 @@ void ofxVFX::end()
             mBaseFbo.draw(0, 0, mWidth, mHeight);
             mEffectFbo.end();
             break;
-        case ofxVFXMode::SOBEL:
-            mSobelShader.begin();
-            mSobelShader.setUniformTexture("uBase", mBaseFbo.getTexture(), 0);
-            ofDrawRectangle(0, 0, mWidth, mHeight);
-            break;
         case ofxVFXMode::BLOOM:
             // Brightness Threshold Pass
             mBrightnessThreshFbo.begin();
@@ -49,7 +44,7 @@ void ofxVFX::end()
             mBaseFbo.draw(0, 0, mWidth, mHeight);
             mBrightnessThreshShader.end();
             mBrightnessThreshFbo.end();
-            
+        
             // Vertical Blur Pass
             mBlurFbo[0].begin();
             ofClear(0, 0);
@@ -60,7 +55,7 @@ void ofxVFX::end()
             mBrightnessThreshFbo.draw(0, 0, mWidth, mHeight);
             mBlurShader.end();
             mBlurFbo[0].end();
-            
+        
             // Horizontal Blur Pass
             mBlurFbo[1].begin();
             ofClear(0, 0);
@@ -71,7 +66,7 @@ void ofxVFX::end()
             mBlurFbo[0].draw(0, 0, mWidth, mHeight);
             mBlurShader.end();
             mBlurFbo[1].end();
-            
+        
             // Composite Pass
             mCompositeFbo.begin();
             ofClear(0, 0);
@@ -81,13 +76,32 @@ void ofxVFX::end()
             mBaseFbo.draw(0, 0, mWidth, mHeight);
             mCompositeShader.end();
             mCompositeFbo.end();
-            
+        
             // Final
             mEffectFbo.begin();
             ofSetColor(255);
             ofClear(0, 0);
             mCompositeFbo.draw(0, 0, mWidth, mHeight);
             mEffectFbo.end();
+            break;
+        case ofxVFXMode::CRT:
+            mCRTShader.begin();
+            mCRTShader.setUniformTexture("uBase", mBaseFbo.getTexture(), 0);
+            ofDrawRectangle(0, 0, mWidth, mHeight);
+            mCRTShader.end();
+            break;
+        case ofxVFXMode::SOBEL:
+            mSobelShader.begin();
+            mSobelShader.setUniformTexture("uBase", mBaseFbo.getTexture(), 0);
+            ofDrawRectangle(0, 0, mWidth, mHeight);
+            mSobelShader.end();
+            break;
+        case ofxVFXMode::SYMMETRY:
+            mSymmetryShader.begin();
+            mSymmetryShader.setUniformTexture("uBase", mBaseFbo.getTexture(), 0);
+            mSymmetryShader.setUniform2f("uResolution", mWidth, mHeight);
+            ofDrawRectangle(0, 0, mWidth, mHeight);
+            mSymmetryShader.end();
             break;
         default:
             break;
@@ -116,10 +130,14 @@ void ofxVFX::setupFbos()
 
 void ofxVFX::setupShaders()
 {
+    // CRT
+    mCRTShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/CRT/CRT.frag", "");
     // Sobel
-    mSobelShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/Sobel/sobel.frag");
+    mSobelShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/Sobel/sobel.frag", "");
+    // Symmetry
+    mSymmetryShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/Symmetry/symmetry.frag", "");
     // Bloom
-    mBrightnessThreshShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/Bloom/brightnessThresh.frag");
-    mBlurShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/Bloom/blur.frag");
-    mCompositeShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/Bloom/composite.frag");
+    mBrightnessThreshShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/Bloom/brightnessThresh.frag", "");
+    mBlurShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/Bloom/blur.frag", "");
+    mCompositeShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/Bloom/composite.frag", "");
 }
