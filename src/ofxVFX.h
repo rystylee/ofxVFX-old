@@ -11,6 +11,7 @@ enum class ofxVFXMode
     SOBEL,
     SYMMETRY,
     STREAK,
+    TWIST,
 };
 
 class ofxVFX
@@ -19,10 +20,11 @@ public:
     ofxVFX();
     void setup(const int w, const int h);
     void update(const float t);
+    void bang();
     void begin();
     void end();
     void draw();
-    
+
     // Setter
     inline void setVFXMode(const ofxVFXMode mode) { mMode = mode; }
     inline void setBloomAttenuation(const float attenuation) { mAttenuation = attenuation; }
@@ -38,6 +40,7 @@ private:
     ofFbo mBaseFbo, mEffectFbo;
     
     float mTime;
+    float mVal1, mVal2, mVal3;
     
     // Bloom
     ofFbo mBrightnessThreshFbo, mBlurFbo[2], mCompositeFbo;
@@ -55,4 +58,7 @@ private:
     
     // Streak
     ofxAutoReloadedShader mStreakShader;
+    
+    // Twist
+    ofxAutoReloadedShader mTwistShader;
 };

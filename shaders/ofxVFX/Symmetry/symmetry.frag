@@ -28,9 +28,8 @@ void main()
     }
     
     // to 0 ~ uResolution
-    vec2 newTexCoord = (min(uResolution.x, uResolution.y) * p + uResolution) * 0.5;
+    vec2 UV = (min(uResolution.x, uResolution.y) * p + uResolution) * 0.5;
     
-    vec4 col = texture(uBase, newTexCoord);
-    
+    vec4 col = texture(uBase, UV);
     fragColor = col;
 }

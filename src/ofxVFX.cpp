@@ -14,6 +14,17 @@ void ofxVFX::setup(const int w, const int h)
 void ofxVFX::update(const float t)
 {
     mTime = t;
+    
+    mVal1 = 0;
+    mVal2 = 0;
+    mVal3 = 0;
+}
+
+void ofxVFX::bang()
+{
+    mVal1 = ofRandom(100);
+    mVal2 = ofRandom(100);
+    mVal3 = ofRandom(100);
 }
 
 void ofxVFX::begin()
@@ -110,6 +121,17 @@ void ofxVFX::end()
             ofDrawRectangle(0, 0, mWidth, mHeight);
             mStreakShader.end();
             break;
+        case ofxVFXMode::TWIST:
+            mTwistShader.begin();
+            mTwistShader.setUniformTexture("uBase", mBaseFbo.getTexture(), 0);
+            mTwistShader.setUniform1f("uTime", mTime);
+            mTwistShader.setUniform1f("uRand", ofRandom(1));
+            mTwistShader.setUniform1f("uVal1", mVal1);
+            mTwistShader.setUniform1f("uVal2", mVal2);
+            mTwistShader.setUniform1f("uVal3", mVal3);
+            ofDrawRectangle(0, 0, mWidth, mHeight);
+            mTwistShader.end();
+            break;
         default:
             break;
     }
@@ -149,4 +171,6 @@ void ofxVFX::setupShaders()
     mSymmetryShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/Symmetry/symmetry.frag", "");
     // Streak
     mStreakShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/Streak/streak.frag", "");
+    // Twist
+    mTwistShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/Twist/Twist.frag", "");
 }
