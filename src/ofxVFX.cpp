@@ -96,32 +96,46 @@ void ofxVFX::end()
             mEffectFbo.end();
             break;
         case ofxVFXMode::CRT:
+            mEffectFbo.begin();
+            ofClear(0, 0);
             mCRTShader.begin();
             mCRTShader.setUniformTexture("uBase", mBaseFbo.getTexture(), 0);
             ofDrawRectangle(0, 0, mWidth, mHeight);
             mCRTShader.end();
+            mEffectFbo.end();
             break;
         case ofxVFXMode::SOBEL:
+            mEffectFbo.begin();
+            ofClear(0, 0);
             mSobelShader.begin();
             mSobelShader.setUniformTexture("uBase", mBaseFbo.getTexture(), 0);
             ofDrawRectangle(0, 0, mWidth, mHeight);
             mSobelShader.end();
+            mEffectFbo.end();
             break;
         case ofxVFXMode::SYMMETRY:
+            mEffectFbo.begin();
+            ofClear(0, 0);
             mSymmetryShader.begin();
             mSymmetryShader.setUniformTexture("uBase", mBaseFbo.getTexture(), 0);
             mSymmetryShader.setUniform2f("uResolution", mWidth, mHeight);
             ofDrawRectangle(0, 0, mWidth, mHeight);
             mSymmetryShader.end();
+            mEffectFbo.end();
             break;
         case ofxVFXMode::STREAK:
+            mEffectFbo.begin();
+            ofClear(0, 0);
             mStreakShader.begin();
             mStreakShader.setUniformTexture("uBase", mBaseFbo.getTexture(), 0);
             mStreakShader.setUniform1f("uTime", mTime);
             ofDrawRectangle(0, 0, mWidth, mHeight);
             mStreakShader.end();
+            mEffectFbo.end();
             break;
         case ofxVFXMode::TWIST:
+            mEffectFbo.begin();
+            ofClear(0, 0);
             mTwistShader.begin();
             mTwistShader.setUniformTexture("uBase", mBaseFbo.getTexture(), 0);
             mTwistShader.setUniform1f("uTime", mTime);
@@ -131,6 +145,7 @@ void ofxVFX::end()
             mTwistShader.setUniform1f("uVal3", mVal3);
             ofDrawRectangle(0, 0, mWidth, mHeight);
             mTwistShader.end();
+            mEffectFbo.end();
             break;
         default:
             break;
