@@ -22,9 +22,9 @@ void ofxVFX::update(const float t)
 
 void ofxVFX::bang()
 {
-    mVal1 = ofRandom(100);
-    mVal2 = ofRandom(100);
-    mVal3 = ofRandom(100);
+    mVal1 = ofRandom(1.0);
+    mVal2 = ofRandom(1.0);
+    mVal3 = ofRandom(1.0);
 }
 
 void ofxVFX::begin()
@@ -133,18 +133,17 @@ void ofxVFX::end()
             mStreakShader.end();
             mEffectFbo.end();
             break;
-        case ofxVFXMode::TWIST:
+        case ofxVFXMode::NOISEWARP:
             mEffectFbo.begin();
             ofClear(0, 0);
-            mTwistShader.begin();
-            mTwistShader.setUniformTexture("uBase", mBaseFbo.getTexture(), 0);
-            mTwistShader.setUniform1f("uTime", mTime);
-            mTwistShader.setUniform1f("uRand", ofRandom(1));
-            mTwistShader.setUniform1f("uVal1", mVal1);
-            mTwistShader.setUniform1f("uVal2", mVal2);
-            mTwistShader.setUniform1f("uVal3", mVal3);
+            mNoiseWarpShader.begin();
+            mNoiseWarpShader.setUniformTexture("uBase", mBaseFbo.getTexture(), 0);
+            mNoiseWarpShader.setUniform1f("uTime", mTime);
+            mNoiseWarpShader.setUniform2f("uResolution", mWidth, mHeight);
+            mNoiseWarpShader.setUniform1f("uVal1", mVal1);
+            mNoiseWarpShader.setUniform1f("uVal2", mVal2);
             ofDrawRectangle(0, 0, mWidth, mHeight);
-            mTwistShader.end();
+            mNoiseWarpShader.end();
             mEffectFbo.end();
             break;
         default:
@@ -186,6 +185,6 @@ void ofxVFX::setupShaders()
     mSymmetryShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/Symmetry/symmetry.frag", "");
     // Streak
     mStreakShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/Streak/streak.frag", "");
-    // Twist
-    mTwistShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/Twist/Twist.frag", "");
+    // NoiseWarp
+    mNoiseWarpShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/NoiseWarp/noisewarp.frag", "");
 }

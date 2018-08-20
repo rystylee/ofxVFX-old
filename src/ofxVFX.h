@@ -11,7 +11,7 @@ enum class ofxVFXMode
     SOBEL,
     SYMMETRY,
     STREAK,
-    TWIST,
+    NOISEWARP,
 };
 
 class ofxVFX
@@ -59,6 +59,6 @@ private:
     // Streak
     ofxAutoReloadedShader mStreakShader;
     
-    // Twist
-    ofxAutoReloadedShader mTwistShader;
+    // NoiseWarp
+    ofxAutoReloadedShader mNoiseWarpShader;
 };

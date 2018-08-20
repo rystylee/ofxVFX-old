@@ -15,8 +15,6 @@ void main()
     vec2 uv = vTexCoord.xy;
     
     vec2 sampleOffset;
-    //if(u_direction == 0) sampleOffset = vec2(1.0 / u_resolution.x, 0.0); // horizontal
-    //else sampleOffset = vec2(0.0, 1.0 / u_resolution.y); // vertical
     if(uDirection == 0) sampleOffset = vec2(1.0, 0.0); // horizontal
     else sampleOffset = vec2(0.0, 1.0); // vertical
     sampleOffset *= uOffsetScale;

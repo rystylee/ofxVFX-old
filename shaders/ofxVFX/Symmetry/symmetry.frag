@@ -16,19 +16,19 @@ void main()
     vec2 uv = vPosition.xy;
     
     // to -1.0 ~ 1.0
-    vec2 p = (uv.xy * 2.0 - uResolution.xy) / min(uResolution.x, uResolution.y);
+    vec2 UV = (uv.xy * 2.0 - uResolution.xy) / min(uResolution.x, uResolution.y);
     
     if(direction == 0)
     {
-        if (p.x > 0.0) p.x = - p.x;
+        if(UV.x > 0.0) UV.x = - UV.x;
     }
     else
     {
-        if (p.y > 0.0) p.y = - p.y;
+        if (UV.y > 0.0) UV.y = - UV.y;
     }
     
     // to 0 ~ uResolution
-    vec2 UV = (min(uResolution.x, uResolution.y) * p + uResolution) * 0.5;
+    UV = (min(uResolution.x, uResolution.y) * UV + uResolution) * 0.5;
     
     vec4 col = texture(uBase, UV);
     fragColor = col;
