@@ -36,7 +36,6 @@ void ofxVFX::begin()
 void ofxVFX::end()
 {
     mBaseFbo.end();
-    
     switch(mMode)
     {
         case ofxVFXMode::NONE:
@@ -146,6 +145,17 @@ void ofxVFX::end()
             mNoiseWarpShader.end();
             mEffectFbo.end();
             break;
+        case ofxVFXMode::CA:
+            mEffectFbo.begin();
+            ofClear(0, 0);
+            mCAShader.begin();
+            mCAShader.setUniformTexture("uBase", mBaseFbo.getTexture(), 0);
+            mCAShader.setUniform1f("uTime", mTime);
+            mCAShader.setUniform1f("uRandVal", ofRandom(1.0));
+            ofDrawRectangle(0, 0, mWidth, mHeight);
+            mCAShader.end();
+            mEffectFbo.end();
+            break;
         default:
             break;
     }
@@ -187,4 +197,6 @@ void ofxVFX::setupShaders()
     mStreakShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/Streak/streak.frag", "");
     // NoiseWarp
     mNoiseWarpShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/NoiseWarp/noisewarp.frag", "");
+    // CA (Chromatic Aberration)
+    mCAShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/CA/ca.frag", "");
 }

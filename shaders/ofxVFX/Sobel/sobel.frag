@@ -8,7 +8,7 @@ out vec4 fragColor;
 uniform sampler2DRect uBase;
 
 // ------------------------------------------------------
-// https://www.shadertoy.com/view/Xdf3Rf
+// reference : https://www.shadertoy.com/view/Xdf3Rf
 // ------------------------------------------------------
 
 float intensity(in vec4 color)
@@ -52,8 +52,9 @@ void main()
     vec3 color = sobel(step, step, uv);
     
     vec3 c = texture(uBase, uv).rgb;
-//    fragColor = vec4(vec3(0, color.r, 0) + c, 1.0);
+//    fragColor = vec4(vec3(color.r, color.r, 0) + c, 1.0);
 //    fragColor = vec4(color + c, 1.0);
-    fragColor = vec4(color * c, 1.0);
+    fragColor = vec4(color, 1.0);
+//    fragColor = vec4(color * c, 1.0);
 //    fragColor = vec4(color, 1.0);
 }

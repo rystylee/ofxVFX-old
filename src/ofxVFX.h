@@ -12,6 +12,7 @@ enum class ofxVFXMode
     SYMMETRY,
     STREAK,
     NOISEWARP,
+    CA, // (Chromatic Aberration)
 };
 
 class ofxVFX
@@ -61,4 +62,7 @@ private:
     
     // NoiseWarp
     ofxAutoReloadedShader mNoiseWarpShader;
+    
+    // CA (Chromatic Aberration)
+    ofxAutoReloadedShader mCAShader;
 };

@@ -11,6 +11,10 @@ uniform float uTime;
 uniform float uVal1;
 uniform float uVal2;
 
+// ------------------------------------------------------
+// reference : https://www.shadertoy.com/view/4sX3RN
+// ------------------------------------------------------
+
 const int isRandom = 0; // 0 is false
 
 float mod289(float x)
@@ -72,7 +76,7 @@ void main()
     }
 
     vec2 n = vec2(v1, v2);
-    vec4 color  = texture(uBase, uv + n);
+    vec4 color  = texture(uBase, min(uv + n, uResolution));
     
     fragColor = color;
 }
