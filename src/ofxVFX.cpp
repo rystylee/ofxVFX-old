@@ -30,7 +30,7 @@ void ofxVFX::bang()
 void ofxVFX::begin()
 {
     mBaseFbo.begin();
-    ofClear(0, 255);
+    ofClear(0);
 }
 
 void ofxVFX::end()
@@ -39,16 +39,18 @@ void ofxVFX::end()
     switch(mMode)
     {
         case ofxVFXMode::NONE:
+        {
             mEffectFbo.begin();
-            ofSetColor(255);
-            ofClear(0, 0);
+            ofClear(0);
             mBaseFbo.draw(0, 0, mWidth, mHeight);
             mEffectFbo.end();
             break;
+        }
         case ofxVFXMode::BLOOM:
+        {
             // Brightness Threshold Pass
             mBrightnessThreshFbo.begin();
-            ofClear(0, 0);
+            ofClear(0);
             mBrightnessThreshShader.begin();
             mBrightnessThreshShader.setUniform1f("uBrightnessThresh", 0.3);
             mBaseFbo.draw(0, 0, mWidth, mHeight);
@@ -57,7 +59,7 @@ void ofxVFX::end()
         
             // Vertical Blur Pass
             mBlurFbo[0].begin();
-            ofClear(0, 0);
+            ofClear(0);
             mBlurShader.begin();
             mBlurShader.setUniform1i("uDirection", 0);
             mBlurShader.setUniform1f("uOffsetScale", mOffsetScale);
@@ -68,7 +70,7 @@ void ofxVFX::end()
         
             // Horizontal Blur Pass
             mBlurFbo[1].begin();
-            ofClear(0, 0);
+            ofClear(0);
             mBlurShader.begin();
             mBlurShader.setUniform1i("uDirection", 1);
             mBlurShader.setUniform1f("uOffsetScale", mOffsetScale);
@@ -89,30 +91,35 @@ void ofxVFX::end()
         
             // Final
             mEffectFbo.begin();
-            ofSetColor(255);
-            ofClear(0, 0);
+            ofClear(0);
             mCompositeFbo.draw(0, 0, mWidth, mHeight);
             mEffectFbo.end();
             break;
+        }
         case ofxVFXMode::CRT:
+        {
             mEffectFbo.begin();
-            ofClear(0, 0);
+            ofClear(0);
             mCRTShader.begin();
             mCRTShader.setUniformTexture("uBase", mBaseFbo.getTexture(), 0);
             ofDrawRectangle(0, 0, mWidth, mHeight);
             mCRTShader.end();
             mEffectFbo.end();
             break;
+        }
         case ofxVFXMode::SOBEL:
+        {
             mEffectFbo.begin();
-            ofClear(0, 0);
+            ofClear(0);
             mSobelShader.begin();
             mSobelShader.setUniformTexture("uBase", mBaseFbo.getTexture(), 0);
             ofDrawRectangle(0, 0, mWidth, mHeight);
             mSobelShader.end();
             mEffectFbo.end();
             break;
+        }
         case ofxVFXMode::SYMMETRY:
+        {
             mEffectFbo.begin();
             ofClear(0, 0);
             mSymmetryShader.begin();
@@ -122,9 +129,11 @@ void ofxVFX::end()
             mSymmetryShader.end();
             mEffectFbo.end();
             break;
+        }
         case ofxVFXMode::STREAK:
+        {
             mEffectFbo.begin();
-            ofClear(0, 0);
+            ofClear(0);
             mStreakShader.begin();
             mStreakShader.setUniformTexture("uBase", mBaseFbo.getTexture(), 0);
             mStreakShader.setUniform1f("uTime", mTime);
@@ -132,9 +141,11 @@ void ofxVFX::end()
             mStreakShader.end();
             mEffectFbo.end();
             break;
+        }
         case ofxVFXMode::NOISEWARP:
+        {
             mEffectFbo.begin();
-            ofClear(0, 0);
+            ofClear(0);
             mNoiseWarpShader.begin();
             mNoiseWarpShader.setUniformTexture("uBase", mBaseFbo.getTexture(), 0);
             mNoiseWarpShader.setUniform1f("uTime", mTime);
@@ -145,9 +156,11 @@ void ofxVFX::end()
             mNoiseWarpShader.end();
             mEffectFbo.end();
             break;
+        }
         case ofxVFXMode::CA:
+        {
             mEffectFbo.begin();
-            ofClear(0, 0);
+            ofClear(0);
             mCAShader.begin();
             mCAShader.setUniformTexture("uBase", mBaseFbo.getTexture(), 0);
             mCAShader.setUniform1f("uTime", mTime);
@@ -156,6 +169,7 @@ void ofxVFX::end()
             mCAShader.end();
             mEffectFbo.end();
             break;
+        }
         default:
             break;
     }
