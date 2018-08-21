@@ -10,6 +10,7 @@ out vec4 fragColor;
 uniform sampler2DRect uBase;
 uniform vec2 uResolution;
 uniform float uTime;
+uniform vec4 uColor;
 
 // 0 == verticel, 1 == horizon1tal
 const int direction = 1;
@@ -26,28 +27,27 @@ void main()
     vec4 col = texture(uBase, uv);
     
     vec3 noise = vec3(xscale, yscale, uTime * speed);
-    float r = snoise(vec3(noise.x * uv.x, noise.y * uv.y, noise.z)); // -1 ~ 1
+    float n = snoise(vec3(noise.x * uv.x, noise.y * uv.y, noise.z)); // -1 ~ 1
 
     if(isTwist == 0)
     {
-        col = texture(uBase, uv + r * 100);
+        col = texture(uBase, uv + n * 100);
     }
     else
     {
-        vec3 c = vec3(1.0, 1.0, 1.0);
         if(isAdd == 0)
         {
-            col.r += r * col.r;
-            col.g += r * col.g;
-            col.b += r * col.b;
+            col.r += n * uColor.r;
+            col.g += n * uColor.g;
+            col.b += n * uColor.b;
         }
         else
         {
-            col.r *= r * col.r;
-            col.g *= r * col.g;
-            col.b *= r * col.b;
+            col.r *= n * col.r;
+            col.g *= n * col.g;
+            col.b *= n * col.b;
         }
     }
     
-    fragColor = vec4(col);
+    fragColor = vec4(col.rgb, 1.0);
 }

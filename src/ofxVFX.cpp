@@ -1,7 +1,7 @@
 #include "ofxVFX.h"
 
 ofxVFX::ofxVFX()
-: mMode(ofxVFXMode::NONE), mAttenuation(1.0), mOffsetScale(1.0)
+: mMode(ofxVFXMode::NONE), mGlobalColor(1.0), mAttenuation(1.0), mOffsetScale(1.0)
 {}
 
 void ofxVFX::setup(const int w, const int h)
@@ -137,6 +137,7 @@ void ofxVFX::end()
             mStreakShader.begin();
             mStreakShader.setUniformTexture("uBase", mBaseFbo.getTexture(), 0);
             mStreakShader.setUniform1f("uTime", mTime);
+            mStreakShader.setUniform4f("uColor", mGlobalColor);
             ofDrawRectangle(0, 0, mWidth, mHeight);
             mStreakShader.end();
             mEffectFbo.end();

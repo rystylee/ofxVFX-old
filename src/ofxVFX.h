@@ -27,6 +27,7 @@ public:
     void draw();
 
     // Setter
+    inline void setGlobalColor(const ofFloatColor& color) { mGlobalColor = color; }
     inline void setVFXMode(const ofxVFXMode mode) { mMode = mode; }
     inline void setBloomAttenuation(const float attenuation) { mAttenuation = attenuation; }
     inline void setBloomOffsetScale(const float offsetScale) { mOffsetScale = offsetScale; }
@@ -42,6 +43,7 @@ private:
     
     float mTime;
     float mVal1, mVal2, mVal3;
+    ofFloatColor mGlobalColor;
     
     // Bloom
     ofFbo mBrightnessThreshFbo, mBlurFbo[2], mCompositeFbo;
