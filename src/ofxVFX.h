@@ -13,6 +13,7 @@ enum class ofxVFXMode
     STREAK,
     NOISEWARP,
     CA, // (Chromatic Aberration)
+    MAX,
 };
 
 class ofxVFX
@@ -32,12 +33,14 @@ public:
     inline void setBloomAttenuation(const float attenuation) { mAttenuation = attenuation; }
     inline void setBloomOffsetScale(const float offsetScale) { mOffsetScale = offsetScale; }
     
+    static const int NUM_VFX_MODES = static_cast<int>(ofxVFXMode::MAX);
+    
 private:
     void setupFbos();
     void setupShaders();
     
     ofxVFXMode mMode;
-    
+
     int mWidth, mHeight;
     ofFbo mBaseFbo, mEffectFbo;
     
