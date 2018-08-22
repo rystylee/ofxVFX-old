@@ -13,6 +13,7 @@ enum class ofxVFXMode
     STREAK,
     NOISEWARP,
     CA, // (Chromatic Aberration)
+    INVERT,
     MAX,
 };
 
@@ -38,7 +39,7 @@ public:
 private:
     void setupFbos();
     void setupShaders();
-    
+
     ofxVFXMode mMode;
 
     int mWidth, mHeight;
@@ -70,4 +71,7 @@ private:
     
     // CA (Chromatic Aberration)
     ofxAutoReloadedShader mCAShader;
+    
+    // Invert
+    ofxAutoReloadedShader mInvertShader;
 };

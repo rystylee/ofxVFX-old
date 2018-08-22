@@ -171,6 +171,18 @@ void ofxVFX::end()
             mEffectFbo.end();
             break;
         }
+        case ofxVFXMode::INVERT:
+        {
+            mEffectFbo.begin();
+            ofClear(0);
+            mInvertShader.begin();
+            mInvertShader.setUniformTexture("uBase", mBaseFbo.getTexture(), 0);
+            mInvertShader.setUniform1f("uTime", mTime);
+            ofDrawRectangle(0, 0, mWidth, mHeight);
+            mInvertShader.end();
+            mEffectFbo.end();
+            break;
+        }
         default:
             break;
     }
@@ -199,19 +211,21 @@ void ofxVFX::setupFbos()
 void ofxVFX::setupShaders()
 {
     // Bloom
-    mBrightnessThreshShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/Bloom/brightnessThresh.frag", "");
-    mBlurShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/Bloom/blur.frag", "");
-    mCompositeShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/Bloom/composite.frag", "");
+    mBrightnessThreshShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/bloom/brightnessThresh.frag", "");
+    mBlurShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/bloom/blur.frag", "");
+    mCompositeShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/bloom/composite.frag", "");
     // CRT
     mCRTShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/CRT/CRT.frag", "");
     // Sobel
-    mSobelShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/Sobel/sobel.frag", "");
+    mSobelShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/sobel/sobel.frag", "");
     // Symmetry
-    mSymmetryShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/Symmetry/symmetry.frag", "");
+    mSymmetryShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/symmetry/symmetry.frag", "");
     // Streak
-    mStreakShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/Streak/streak.frag", "");
+    mStreakShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/streak/streak.frag", "");
     // NoiseWarp
-    mNoiseWarpShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/NoiseWarp/noisewarp.frag", "");
+    mNoiseWarpShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/noiseWarp/noiseWarp.frag", "");
     // CA (Chromatic Aberration)
     mCAShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/CA/ca.frag", "");
+    // Invert
+    mInvertShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/invert/invert.frag", "");
 }
