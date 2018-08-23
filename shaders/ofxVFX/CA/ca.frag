@@ -21,7 +21,7 @@ void main()
     
     float t = pow((((1.0 + sin(uTime * 10.0) * 0.5)
                     * 0.8 + sin(uTime * cos(uv.y) * 41415.92653) * 0.0125)
-                    * 1.5 + sin(uTime * 7.0) * 0.5), 5.0);
+                   * 1.5 + sin(uTime * 7.0) * 0.5), 5.0);
 
     if(uRandVal < 0.5)
         t = t;

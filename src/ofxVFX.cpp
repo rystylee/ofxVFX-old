@@ -1,7 +1,7 @@
 #include "ofxVFX.h"
 
 ofxVFX::ofxVFX()
-: mMode(ofxVFXMode::NONE), mGlobalColor(1.0), mAttenuation(1.0), mOffsetScale(1.0)
+: mMode(ofxVFXMode::NONE), mGlobalColor(1.0), mAttenuation(1.0), mOffsetScale(1.0), mAmt(1.5), mScale(2.0)
 {}
 
 void ofxVFX::setup(const int w, const int h)
@@ -81,7 +81,7 @@ void ofxVFX::end()
         
             // Composite Pass
             mCompositeFbo.begin();
-            ofClear(0, 0);
+            ofClear(0);
             mCompositeShader.begin();
             mCompositeShader.setUniformTexture("uBlur", mBlurFbo[1].getTexture(), 1);
             mCompositeShader.setUniform1f("uGamma", 2.2);
@@ -94,6 +94,66 @@ void ofxVFX::end()
             ofClear(0);
             mCompositeFbo.draw(0, 0, mWidth, mHeight);
             mEffectFbo.end();
+            break;
+        }
+        case ofxVFXMode::OPTICALFLOW:
+        {
+            mFlowVecFbo.begin();
+            ofClear(0);
+            mFlowShader.begin();
+            mFlowShader.setUniformTexture("uBackBuffer", mBackBuffer.getTexture(), 1);
+            mFlowShader.setUniform1f("uThresh", 0.01);
+            mFlowShader.setUniform1f("uOffset", 1.0);
+            mFlowShader.setUniform1f("uLambda", 0.01);
+            mBaseFbo.draw(0, 0, mWidth, mHeight);
+            mFlowShader.end();
+            mFlowVecFbo.end();
+            
+            // Vertical Blur Pass
+            mBlurFbo[0].begin();
+            ofClear(0, 0);
+            mBlurShader.begin();
+            mBlurShader.setUniform1i("uDirection", 0);
+            mBlurShader.setUniform1f("uOffsetScale", mOffsetScale);
+            mBlurShader.setUniform1f("uAttenuation", mAttenuation);
+            mFlowVecFbo.draw(0, 0, mWidth, mHeight);
+            mBlurShader.end();
+            mBlurFbo[0].end();
+            
+            // Horizontal Blur Pass
+            mBlurFbo[1].begin();
+            ofClear(0, 0);
+            mBlurShader.begin();
+            mBlurShader.setUniform1i("uDirection", 1);
+            mBlurShader.setUniform1f("uOffsetScale", mOffsetScale);
+            mBlurShader.setUniform1f("uAttenuation", mAttenuation);
+            mBlurFbo[0].draw(0, 0, mWidth, mHeight);
+            mBlurShader.end();
+            mBlurFbo[1].end();
+            
+            // Composite Pass
+            mCompositeFbo.begin();
+            ofClear(0);
+            mRenderShader.begin();
+            mRenderShader.setUniformTexture("uBlur", mBlurFbo[1].getTexture(), 1);
+            mRenderShader.setUniform2f("uResolution", mWidth, mHeight);
+            mRenderShader.setUniform1f("uAmt", mAmt);
+            mRenderShader.setUniform1f("uScale", mScale);
+            mBaseFbo.draw(0, 0, mWidth, mHeight);
+            mRenderShader.end();
+            mCompositeFbo.end();
+            
+            // Final
+            mEffectFbo.begin();
+            ofClear(0);
+            mCompositeFbo.draw(0, 0, mWidth, mHeight);
+            mEffectFbo.end();
+            
+            // swap backbuffer
+            mBackBuffer.begin();
+            ofClear(0);
+            mBaseFbo.draw(0, 0, mWidth, mHeight);
+            mBackBuffer.end();
             break;
         }
         case ofxVFXMode::CRT:
@@ -191,6 +251,7 @@ void ofxVFX::end()
 void ofxVFX::draw()
 {
     mEffectFbo.draw(0, 0, mWidth, mHeight);
+//    mBlurFbo[1].draw(0, 0, mWidth, mHeight);
 }
 
 void ofxVFX::setupFbos()
@@ -206,6 +267,10 @@ void ofxVFX::setupFbos()
         mBlurFbo[i].allocate(mWidth, mHeight, GL_RGBA16F);
     }
     mCompositeFbo.allocate(mWidth, mHeight, GL_RGBA16F);
+    
+    // Optical Flow
+    mBackBuffer.allocate(mWidth, mHeight, GL_RGBA16F);
+    mFlowVecFbo.allocate(mWidth, mHeight, GL_RGBA16F);
 }
 
 void ofxVFX::setupShaders()
@@ -228,4 +293,7 @@ void ofxVFX::setupShaders()
     mCAShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/CA/ca.frag", "");
     // Invert
     mInvertShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/invert/invert.frag", "");
+    // Optical Flow
+    mFlowShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/opticalFlow/flow.frag", "");
+    mRenderShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/opticalFlow/render.frag", "");
 }
