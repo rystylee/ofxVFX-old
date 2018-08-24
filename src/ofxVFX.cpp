@@ -1,14 +1,14 @@
 #include "ofxVFX.h"
 
 ofxVFX::ofxVFX()
-: mMode(ofxVFXMode::NONE), mGlobalColor(1.0), mAttenuation(1.0), mOffsetScale(1.0), mAmt(1.5), mScale(2.0)
+: mMode(ofxVFXMode::NONE), mGlobalColor(1.0), mBloomAttenuation(1.0), mBlurScale(1.0), mOpticalScale(5.0), mOpticalFade(0.99), mOpticalForce(0.6), mOpticalAmt(1.0)
 {}
 
 void ofxVFX::setup(const int w, const int h)
 {
     mWidth = w; mHeight = h;
-    setupFbos();
-    setupShaders();
+    initFbos();
+    loadShaders();
 }
 
 void ofxVFX::update(const float t)
@@ -62,8 +62,8 @@ void ofxVFX::end()
             ofClear(0);
             mBlurShader.begin();
             mBlurShader.setUniform1i("uDirection", 0);
-            mBlurShader.setUniform1f("uOffsetScale", mOffsetScale);
-            mBlurShader.setUniform1f("uAttenuation", mAttenuation);
+            mBlurShader.setUniform1f("uOffsetScale", mBlurScale);
+            mBlurShader.setUniform1f("uAttenuation", mBloomAttenuation);
             mBrightnessThreshFbo.draw(0, 0, mWidth, mHeight);
             mBlurShader.end();
             mBlurFbo[0].end();
@@ -73,8 +73,8 @@ void ofxVFX::end()
             ofClear(0);
             mBlurShader.begin();
             mBlurShader.setUniform1i("uDirection", 1);
-            mBlurShader.setUniform1f("uOffsetScale", mOffsetScale);
-            mBlurShader.setUniform1f("uAttenuation", mAttenuation);
+            mBlurShader.setUniform1f("uOffsetScale", mBlurScale);
+            mBlurShader.setUniform1f("uAttenuation", mBloomAttenuation);
             mBlurFbo[0].draw(0, 0, mWidth, mHeight);
             mBlurShader.end();
             mBlurFbo[1].end();
@@ -98,25 +98,29 @@ void ofxVFX::end()
         }
         case ofxVFXMode::OPTICALFLOW:
         {
-            mFlowVecFbo.begin();
+            mFlowPingPong.dst->begin();
             ofClear(0);
             mFlowShader.begin();
             mFlowShader.setUniformTexture("uBackBuffer", mBackBuffer.getTexture(), 1);
-            mFlowShader.setUniform1f("uThresh", 0.01);
-            mFlowShader.setUniform1f("uOffset", 1.0);
+            mFlowShader.setUniformTexture("uPrevFlowBuffer", mFlowPingPong.src->getTexture(), 2);
+            mFlowShader.setUniform1f("uThresh", 0.05);
+            mFlowShader.setUniform1f("uOffset", mOpticalScale);
             mFlowShader.setUniform1f("uLambda", 0.01);
+            mFlowShader.setUniform1f("uForce", mOpticalForce);
+            mFlowShader.setUniform1f("uFade", mOpticalFade);
             mBaseFbo.draw(0, 0, mWidth, mHeight);
             mFlowShader.end();
-            mFlowVecFbo.end();
+            mFlowPingPong.dst->end();
+            mFlowPingPong.swap();
             
             // Vertical Blur Pass
             mBlurFbo[0].begin();
             ofClear(0, 0);
             mBlurShader.begin();
             mBlurShader.setUniform1i("uDirection", 0);
-            mBlurShader.setUniform1f("uOffsetScale", mOffsetScale);
-            mBlurShader.setUniform1f("uAttenuation", mAttenuation);
-            mFlowVecFbo.draw(0, 0, mWidth, mHeight);
+            mBlurShader.setUniform1f("uOffsetScale", mBlurScale);
+            mBlurShader.setUniform1f("uAttenuation", mBloomAttenuation);
+            mFlowPingPong.dst->draw(0, 0, mWidth, mHeight);
             mBlurShader.end();
             mBlurFbo[0].end();
             
@@ -125,8 +129,8 @@ void ofxVFX::end()
             ofClear(0, 0);
             mBlurShader.begin();
             mBlurShader.setUniform1i("uDirection", 1);
-            mBlurShader.setUniform1f("uOffsetScale", mOffsetScale);
-            mBlurShader.setUniform1f("uAttenuation", mAttenuation);
+            mBlurShader.setUniform1f("uOffsetScale", mBlurScale);
+            mBlurShader.setUniform1f("uAttenuation", mBloomAttenuation);
             mBlurFbo[0].draw(0, 0, mWidth, mHeight);
             mBlurShader.end();
             mBlurFbo[1].end();
@@ -135,10 +139,9 @@ void ofxVFX::end()
             mCompositeFbo.begin();
             ofClear(0);
             mRenderShader.begin();
-            mRenderShader.setUniformTexture("uBlur", mBlurFbo[1].getTexture(), 1);
+            mRenderShader.setUniformTexture("uFlow", mBlurFbo[1].getTexture(), 1);
             mRenderShader.setUniform2f("uResolution", mWidth, mHeight);
-            mRenderShader.setUniform1f("uAmt", mAmt);
-            mRenderShader.setUniform1f("uScale", mScale);
+            mRenderShader.setUniform1f("uAmt", mOpticalAmt);
             mBaseFbo.draw(0, 0, mWidth, mHeight);
             mRenderShader.end();
             mCompositeFbo.end();
@@ -254,7 +257,7 @@ void ofxVFX::draw()
 //    mBlurFbo[1].draw(0, 0, mWidth, mHeight);
 }
 
-void ofxVFX::setupFbos()
+void ofxVFX::initFbos()
 {
     mBaseFbo.allocate(mWidth, mHeight, GL_RGBA16F);
 //    mBaseFbo.getTexture().getTextureData().bFlipTexture = true;
@@ -270,10 +273,24 @@ void ofxVFX::setupFbos()
     
     // Optical Flow
     mBackBuffer.allocate(mWidth, mHeight, GL_RGBA16F);
-    mFlowVecFbo.allocate(mWidth, mHeight, GL_RGBA16F);
+    auto color = make_unique<float[]>(mWidth * mHeight * 4);
+    for(int x=0; x<mWidth; x++)
+    {
+        for(int y=0; y<mHeight; y++)
+        {
+            const int i = y * mWidth + x;
+            color[i * 4 + 0] = 0.0;
+            color[i * 4 + 1] = 0.0;
+            color[i * 4 + 2] = 0.0;
+            color[i * 4 + 3] = 0.0;
+        }
+    }
+    mFlowPingPong.allocate(mWidth, mHeight, GL_RGB32F);
+    mFlowPingPong.src->getTexture().loadData(color.get(), mWidth, mHeight, GL_RGB32F);
+    mFlowPingPong.dst->getTexture().loadData(color.get(), mWidth, mHeight, GL_RGB32F);
 }
 
-void ofxVFX::setupShaders()
+void ofxVFX::loadShaders()
 {
     // Bloom
     mBrightnessThreshShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/bloom/brightnessThresh.frag", "");

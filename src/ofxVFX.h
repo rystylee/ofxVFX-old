@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ofMain.h"
+#include "PingPongBuffer.hpp"
 #include "ofxAutoReloadedShader.h"
 
 enum class ofxVFXMode
@@ -32,16 +33,18 @@ public:
     // Setter
     inline void setGlobalColor(const ofFloatColor& color) { mGlobalColor = color; }
     inline void setVFXMode(const ofxVFXMode mode) { mMode = mode; }
-    inline void setAttenuation(const float attenuation) { mAttenuation = attenuation; }
-    inline void setOffsetScale(const float offsetScale) { mOffsetScale = offsetScale; }
-    inline void setOpticalAmt(const float amt) { mAmt = amt; }
-    inline void setOpticalScale(const float scale) { mScale = scale; }
-
+    inline void setBloomAttenuation(const float attenuation) { mBloomAttenuation = attenuation; }
+    inline void setBlurScale(const float blurScale) { mBlurScale = blurScale; }
+    inline void setOpticalScale(const float opticalScale) { mOpticalScale = opticalScale; }
+    inline void setOpticalFade(const float opticalFade) { mOpticalFade = opticalFade; }
+    inline void setOpticalForce(const float opticalForce) { mOpticalForce = opticalForce; }
+    inline void setOpticalAmt(const float opticalAmt) { mOpticalAmt = opticalAmt; }
+    
     static const int NUM_VFX_MODES = static_cast<int>(ofxVFXMode::MAX);
     
 private:
-    void setupFbos();
-    void setupShaders();
+    void initFbos();
+    void loadShaders();
 
     ofxVFXMode mMode;
 
@@ -55,12 +58,13 @@ private:
     // Bloom
     ofFbo mBrightnessThreshFbo, mBlurFbo[2], mCompositeFbo;
     ofxAutoReloadedShader mBrightnessThreshShader, mBlurShader, mCompositeShader; // share with Optical flow
-    float mAttenuation, mOffsetScale;
+    float mBloomAttenuation, mBlurScale;
     
     // Optical Flow
-    ofFbo mBackBuffer, mFlowVecFbo; // and used the mBlurFbo[2]
+    ofFbo mBackBuffer; // and used the mBlurFbo[2]
+    PingPongBuffer mFlowPingPong;
     ofxAutoReloadedShader mFlowShader, mRenderShader; // and used the mBlurShader
-    float mAmt, mScale;
+    float mOpticalScale, mOpticalFade, mOpticalForce, mOpticalAmt;
     
     // CRT
     ofxAutoReloadedShader mCRTShader;

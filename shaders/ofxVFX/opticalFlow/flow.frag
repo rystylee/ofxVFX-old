@@ -1,16 +1,23 @@
 #version 400 core
 precision highp float;
 
-uniform sampler2DRect uBackBuffer;
 uniform sampler2DRect tex;
+uniform sampler2DRect uBackBuffer;
+uniform sampler2DRect uPrevFlowBuffer;
 uniform float uThresh;
 uniform float uOffset;
 uniform float uLambda;
+uniform float uForce;
+uniform float uFade;
 
 in vec4 vPosition;
 in vec2 vTexCoord;
 
 out vec4 fragColor;
+
+// --------------------------------------------------------
+// reference : https://www.shadertoy.com/view/XtdXWN
+// --------------------------------------------------------
 
 vec4 getGrayScale(vec4 col)
 {
@@ -29,6 +36,10 @@ vec4 gradient(sampler2DRect tex, vec2 uv, vec2 offset)
     return vec4(texture(tex, uv + offset) - texture(tex, uv - offset));
 }
 
+float sumRgb(vec3 rgb)
+{
+    return (rgb.r + rgb.g + rgb.b) / 3.0;
+}
 
 void main()
 {
@@ -36,13 +47,16 @@ void main()
     vec4 prev = texture(uBackBuffer, uv);
     vec4 current = texture(tex, uv);
     vec4 diff = current - prev;
+//    vec4 diff = prev - current;
 
     vec2 offX = vec2(uOffset, 0.0);
     vec2 offY = vec2(0.0, uOffset);
 
     // calculate the gradient
-    vec4 gradX = gradient(uBackBuffer, uv, offX) + gradient(tex, uv, offX);
-    vec4 gradY = gradient(uBackBuffer, uv, offY) + gradient(tex, uv, offY);
+//    vec4 gradX = gradient(uBackBuffer, uv, offX) + gradient(tex, uv, offX);
+//    vec4 gradY = gradient(uBackBuffer, uv, offY) + gradient(tex, uv, offY);
+    vec4 gradX = gradient(uBackBuffer, uv, offX);
+    vec4 gradY = gradient(uBackBuffer, uv, offY);
 
     vec4 gradMag = sqrt((gradX * gradX) + (gradY * gradY) + vec4(uLambda));
     vec4 invGMag = 1.0 / gradMag;
@@ -50,9 +64,13 @@ void main()
     vec4 vx = diff * (gradX * invGMag);
     vec4 vy = diff * (gradY * invGMag);
 
-    vec2 flow = vec2(0.0);
-    flow.x = -(vx.x + vx.y + vx.z) / 3.0;
-    flow.y = -(vy.x + vy.y + vy.z) / 3.0;
+//    vec2 flow = vec2(0.0);
+//    flow.x = -(vx.x + vx.y + vx.z) / 3.0;
+//    flow.y = -(vy.x + vy.y + vy.z) / 3.0;
+    
+    float xAvg = sumRgb(vx.rgb) * uForce;
+    float yAvg = sumRgb(vy.rgb) * uForce;
+    vec2 flow = vec2(xAvg, yAvg);
     
     float strength = length(flow);
     if (strength * uThresh > 0.0)
@@ -68,5 +86,7 @@ void main()
         }
     }
 
-    fragColor = vec4(flow, 0.0, 1.0);
+    vec2 last = texture(uPrevFlowBuffer, uv).rg;
+    last *= uFade;
+    fragColor = vec4(flow, 0.0, 1.0) + vec4(last, 0.0, 0.0);
 }
