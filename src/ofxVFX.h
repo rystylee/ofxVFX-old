@@ -16,6 +16,7 @@ enum class ofxVFXMode
     NOISEWARP,
     CA, // (Chromatic Aberration)
     INVERT,
+    MNCA, // (Multiple Neighborhoods Cellular Automata)
     MAX,
 };
 
@@ -87,4 +88,12 @@ private:
     
     // Invert
     ofxAutoReloadedShader mInvertShader;
+    
+    // MNCA (Multiple Neighborhoods Cellular Automata)
+    ofxAutoReloadedShader mMNCA0Shader;
+    ofxAutoReloadedShader mMNCARenderShader;
+    ofxAutoReloadedShader mMNCACompositeShader;
+    PingPongBuffer mMNCAPingPong;
+    int mIsMNCAReset;
+    ofImage mNoiseTex;
 };

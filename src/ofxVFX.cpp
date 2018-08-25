@@ -2,7 +2,7 @@
 
 ofxVFX::ofxVFX()
 : mMode(ofxVFXMode::NONE), mGlobalColor(1.0), mBloomAttenuation(1.0), mBlurScale(1.0)
-, mOpticalThresh(0.5), mOpticalScale(5.0), mOpticalFade(0.99), mOpticalForce(0.6), mOpticalAmt(1.0)
+, mOpticalThresh(0.5), mOpticalScale(5.0), mOpticalFade(0.99), mOpticalForce(0.6), mOpticalAmt(1.0), mIsMNCAReset(0)
 {}
 
 void ofxVFX::setup(const int w, const int h)
@@ -10,6 +10,7 @@ void ofxVFX::setup(const int w, const int h)
     mWidth = w; mHeight = h;
     initFbos();
     loadShaders();
+    mNoiseTex.load("textures/ofxVFX/mnca/noise.png");
 }
 
 void ofxVFX::update(const float t)
@@ -247,6 +248,46 @@ void ofxVFX::end()
             mEffectFbo.end();
             break;
         }
+        case ofxVFXMode::MNCA:
+        {
+            if(ofRandom(1.0) < 0.2)
+            {
+                mMNCAPingPong.dst->begin();
+                ofClear(0);
+                ofPushStyle();
+                ofSetColor(255);
+                mBaseFbo.draw(0, 0, mWidth, mHeight);
+                mMNCAPingPong.dst->end();
+                mMNCAPingPong.swap();
+                ofPopStyle();
+            }
+            
+            mMNCAPingPong.dst->begin();
+            ofClear(0);
+            mMNCA0Shader.begin();
+            mMNCA0Shader.setUniformTexture("uPrevBuffer", mMNCAPingPong.src->getTexture(), 0);
+            mMNCA0Shader.setUniformTexture("uNoiseTex", mNoiseTex.getTexture(), 1);
+            mMNCA0Shader.setUniform1i("uIsReset", mIsMNCAReset);
+            mMNCAPingPong.src->draw(0, 0, mWidth, mHeight);
+            mMNCA0Shader.end();
+            mMNCAPingPong.dst->end();
+            mMNCAPingPong.swap();
+            
+            mEffectFbo.begin();
+            ofClear(0);
+            mMNCARenderShader.begin();
+            mMNCARenderShader.setUniformTexture("uSimuTex", mMNCAPingPong.dst->getTexture(), 0);
+            mMNCARenderShader.setUniformTexture("uBase", mBaseFbo.getTexture(), 1);
+            mMNCARenderShader.setUniform2f("uResolution", mWidth, mHeight);
+            mMNCARenderShader.setUniform1i("uColorMode", 0);
+            mMNCARenderShader.setUniform1f("uTime", mTime);
+            ofDrawRectangle(0, 0, mWidth, mHeight);
+            mMNCARenderShader.end();
+            mEffectFbo.end();
+            
+            mIsMNCAReset++;
+            break;
+        }
         default:
             break;
     }
@@ -255,7 +296,6 @@ void ofxVFX::end()
 void ofxVFX::draw()
 {
     mEffectFbo.draw(0, 0, mWidth, mHeight);
-//    mBlurFbo[1].draw(0, 0, mWidth, mHeight);
 }
 
 void ofxVFX::initFbos()
@@ -274,21 +314,38 @@ void ofxVFX::initFbos()
     
     // Optical Flow
     mBackBuffer.allocate(mWidth, mHeight, GL_RGBA16F);
-    auto color = make_unique<float[]>(mWidth * mHeight * 4);
+    auto opticalColor = make_unique<float[]>(mWidth * mHeight * 4);
     for(int x=0; x<mWidth; x++)
     {
         for(int y=0; y<mHeight; y++)
         {
-            const int i = y * mWidth + x;
-            color[i * 4 + 0] = 0.0;
-            color[i * 4 + 1] = 0.0;
-            color[i * 4 + 2] = 0.0;
-            color[i * 4 + 3] = 0.0;
+//            const int i = y * mWidth + x;
+            const int i = x * mHeight + y;
+            opticalColor[i * 4 + 0] = 0.0;
+            opticalColor[i * 4 + 1] = 0.0;
+            opticalColor[i * 4 + 2] = 0.0;
+            opticalColor[i * 4 + 3] = 0.0;
         }
     }
     mFlowPingPong.allocate(mWidth, mHeight, GL_RGB32F);
-    mFlowPingPong.src->getTexture().loadData(color.get(), mWidth, mHeight, GL_RGB32F);
-    mFlowPingPong.dst->getTexture().loadData(color.get(), mWidth, mHeight, GL_RGB32F);
+    mFlowPingPong.src->getTexture().loadData(opticalColor.get(), mWidth, mHeight, GL_RGB32F);
+    mFlowPingPong.dst->getTexture().loadData(opticalColor.get(), mWidth, mHeight, GL_RGB32F);
+    
+    // MNCA
+    auto mncaColor = make_unique<float[]>(mWidth * mHeight * 3);
+    for(int x=0; x<mWidth; x++)
+    {
+        for(int y=0; y<mHeight; y++)
+        {
+            const int i = x * mHeight + y;
+            mncaColor[i * 3 + 0] = ofRandom(1.0);
+            mncaColor[i * 3 + 1] = ofRandom(1.0);
+            mncaColor[i * 3 + 2] = ofRandom(1.0);
+        }
+    }
+    mMNCAPingPong.allocate(mWidth, mHeight, GL_RGB32F);
+    mMNCAPingPong.src->getTexture().loadData(mncaColor.get(), mWidth, mHeight, GL_RGB32F);
+    mMNCAPingPong.dst->getTexture().loadData(mncaColor.get(), mWidth, mHeight, GL_RGB32F);
 }
 
 void ofxVFX::loadShaders()
@@ -314,4 +371,8 @@ void ofxVFX::loadShaders()
     // Optical Flow
     mFlowShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/opticalFlow/flow.frag", "");
     mRenderShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/opticalFlow/render.frag", "");
+    // MNCA (Multiple Neighborhoods Cellular Automata)
+    mMNCA0Shader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/mnca/mnca0.frag", "");
+    mMNCARenderShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/mnca/render.frag", "");
+    mMNCACompositeShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/mnca/comosite.frag", "");
 }
