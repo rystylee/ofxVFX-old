@@ -1,7 +1,8 @@
 #include "ofxVFX.h"
 
 ofxVFX::ofxVFX()
-: mMode(ofxVFXMode::NONE), mGlobalColor(1.0), mBloomAttenuation(1.0), mBlurScale(1.0), mOpticalScale(5.0), mOpticalFade(0.99), mOpticalForce(0.6), mOpticalAmt(1.0)
+: mMode(ofxVFXMode::NONE), mGlobalColor(1.0), mBloomAttenuation(1.0), mBlurScale(1.0)
+, mOpticalThresh(0.5), mOpticalScale(5.0), mOpticalFade(0.99), mOpticalForce(0.6), mOpticalAmt(1.0)
 {}
 
 void ofxVFX::setup(const int w, const int h)
@@ -103,7 +104,7 @@ void ofxVFX::end()
             mFlowShader.begin();
             mFlowShader.setUniformTexture("uBackBuffer", mBackBuffer.getTexture(), 1);
             mFlowShader.setUniformTexture("uPrevFlowBuffer", mFlowPingPong.src->getTexture(), 2);
-            mFlowShader.setUniform1f("uThresh", 0.05);
+            mFlowShader.setUniform1f("uThresh", mOpticalThresh);
             mFlowShader.setUniform1f("uOffset", mOpticalScale);
             mFlowShader.setUniform1f("uLambda", 0.01);
             mFlowShader.setUniform1f("uForce", mOpticalForce);

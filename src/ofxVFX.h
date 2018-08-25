@@ -35,6 +35,7 @@ public:
     inline void setVFXMode(const ofxVFXMode mode) { mMode = mode; }
     inline void setBloomAttenuation(const float attenuation) { mBloomAttenuation = attenuation; }
     inline void setBlurScale(const float blurScale) { mBlurScale = blurScale; }
+    inline void setOpticalThresh(const float opticalThresh) { mOpticalThresh = opticalThresh; }
     inline void setOpticalScale(const float opticalScale) { mOpticalScale = opticalScale; }
     inline void setOpticalFade(const float opticalFade) { mOpticalFade = opticalFade; }
     inline void setOpticalForce(const float opticalForce) { mOpticalForce = opticalForce; }
@@ -64,7 +65,7 @@ private:
     ofFbo mBackBuffer; // and used the mBlurFbo[2]
     PingPongBuffer mFlowPingPong;
     ofxAutoReloadedShader mFlowShader, mRenderShader; // and used the mBlurShader
-    float mOpticalScale, mOpticalFade, mOpticalForce, mOpticalAmt;
+    float mOpticalThresh, mOpticalScale, mOpticalFade, mOpticalForce, mOpticalAmt;
     
     // CRT
     ofxAutoReloadedShader mCRTShader;
