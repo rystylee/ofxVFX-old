@@ -2,7 +2,7 @@
 
 ofxVFX::ofxVFX()
 : mMode(ofxVFXMode::NONE), mGlobalColor(1.0), mBloomAttenuation(1.0), mBlurScale(1.0)
-, mOpticalThresh(0.5), mOpticalScale(5.0), mOpticalFade(0.99), mOpticalForce(0.6), mOpticalAmt(1.0), mIsMNCAReset(0)
+, mOpticalThresh(0.5), mOpticalScale(5.0), mOpticalFade(0.99), mOpticalForce(0.6), mOpticalAmt(1.0), mIsMNCAReset(0), mMNCAColorMode(0)
 {}
 
 void ofxVFX::setup(const int w, const int h)
@@ -279,7 +279,7 @@ void ofxVFX::end()
             mMNCARenderShader.setUniformTexture("uSimuTex", mMNCAPingPong.dst->getTexture(), 0);
             mMNCARenderShader.setUniformTexture("uBase", mBaseFbo.getTexture(), 1);
             mMNCARenderShader.setUniform2f("uResolution", mWidth, mHeight);
-            mMNCARenderShader.setUniform1i("uColorMode", 0);
+            mMNCARenderShader.setUniform1i("uColorMode", mMNCAColorMode);
             mMNCARenderShader.setUniform1f("uTime", mTime);
             ofDrawRectangle(0, 0, mWidth, mHeight);
             mMNCARenderShader.end();

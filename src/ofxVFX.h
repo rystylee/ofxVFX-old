@@ -41,6 +41,7 @@ public:
     inline void setOpticalFade(const float opticalFade) { mOpticalFade = opticalFade; }
     inline void setOpticalForce(const float opticalForce) { mOpticalForce = opticalForce; }
     inline void setOpticalAmt(const float opticalAmt) { mOpticalAmt = opticalAmt; }
+	inline void setMNCAColorMode(const int colorMode) { mMNCAColorMode = colorMode;  }
     
     static const int NUM_VFX_MODES = static_cast<int>(ofxVFXMode::MAX);
     
@@ -95,5 +96,6 @@ private:
     ofxAutoReloadedShader mMNCACompositeShader;
     PingPongBuffer mMNCAPingPong;
     int mIsMNCAReset;
+	int mMNCAColorMode;
     ofImage mNoiseTex;
 };
