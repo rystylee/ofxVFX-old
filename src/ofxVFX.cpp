@@ -84,11 +84,11 @@ void ofxVFX::end()
             // Composite Pass
             mCompositeFbo.begin();
             ofClear(0);
-            mCompositeShader.begin();
-            mCompositeShader.setUniformTexture("uBlur", mBlurFbo[1].getTexture(), 1);
-            mCompositeShader.setUniform1f("uGamma", 2.2);
+            mBloomCompositeShader.begin();
+            mBloomCompositeShader.setUniformTexture("uBlur", mBlurFbo[1].getTexture(), 1);
+            mBloomCompositeShader.setUniform1f("uGamma", 2.2);
             mBaseFbo.draw(0, 0, mWidth, mHeight);
-            mCompositeShader.end();
+            mBloomCompositeShader.end();
             mCompositeFbo.end();
         
             // Final
@@ -140,12 +140,12 @@ void ofxVFX::end()
             // Composite Pass
             mCompositeFbo.begin();
             ofClear(0);
-            mRenderShader.begin();
-            mRenderShader.setUniformTexture("uFlow", mBlurFbo[1].getTexture(), 1);
-            mRenderShader.setUniform2f("uResolution", mWidth, mHeight);
-            mRenderShader.setUniform1f("uAmt", mOpticalAmt);
+            mFlowRenderShader.begin();
+            mFlowRenderShader.setUniformTexture("uFlow", mBlurFbo[1].getTexture(), 1);
+            mFlowRenderShader.setUniform2f("uResolution", mWidth, mHeight);
+            mFlowRenderShader.setUniform1f("uAmt", mOpticalAmt);
             mBaseFbo.draw(0, 0, mWidth, mHeight);
-            mRenderShader.end();
+            mFlowRenderShader.end();
             mCompositeFbo.end();
             
             // Final
@@ -288,6 +288,27 @@ void ofxVFX::end()
             mIsMNCAReset++;
             break;
         }
+        case ofxVFXMode::INK:
+            mInkPingPong.dst->begin();
+            ofClear(0);
+            mInkShader.begin();
+            mInkShader.setUniformTexture("uPrevBuffer", mInkPingPong.src->getTexture(), 0);
+            mInkShader.setUniformTexture("uBase", mBaseFbo.getTexture(), 1);
+            mInkShader.setUniform1f("uTime", mTime);
+            mInkShader.setUniform2f("uResolution", mWidth, mHeight);
+            mInkShader.setUniform1i("uCount", ofGetFrameNum());
+            mInkPingPong.src->draw(0, 0, mWidth, mHeight);
+            mInkShader.end();
+            mInkPingPong.dst->end();
+            mInkPingPong.swap();
+            
+            mEffectFbo.begin();
+            ofClear(0);
+            mInkRenderShader.begin();
+            mInkRenderShader.setUniformTexture("uResult", mInkPingPong.dst->getTexture(), 0);
+            ofDrawRectangle(0, 0, mWidth, mHeight);
+            mInkRenderShader.end();
+            mEffectFbo.end();
         default:
             break;
     }
@@ -346,6 +367,23 @@ void ofxVFX::initFbos()
     mMNCAPingPong.allocate(mWidth, mHeight, GL_RGB32F);
     mMNCAPingPong.src->getTexture().loadData(mncaColor.get(), mWidth, mHeight, GL_RGB32F);
     mMNCAPingPong.dst->getTexture().loadData(mncaColor.get(), mWidth, mHeight, GL_RGB32F);
+    
+    // Ink
+    auto inkColor = make_unique<float[]>(mWidth * mHeight * 4);
+    for(int x=0; x<mWidth; x++)
+    {
+        for(int y=0; y<mHeight; y++)
+        {
+            const int i = x * mHeight + y;
+            inkColor[i * 4 + 0] = 0.0;
+            inkColor[i * 4 + 1] = 0.0;
+            inkColor[i * 4 + 2] = 0.0;
+            inkColor[i * 4 + 3] = 0.0;
+        }
+    }
+    mInkPingPong.allocate(mWidth, mHeight, GL_RGBA);
+    mInkPingPong.src->getTexture().loadData(inkColor.get(), mWidth, mHeight, GL_RGBA);
+    mInkPingPong.dst->getTexture().loadData(inkColor.get(), mWidth, mHeight, GL_RGBA);
 }
 
 void ofxVFX::loadShaders()
@@ -353,7 +391,7 @@ void ofxVFX::loadShaders()
     // Bloom
     mBrightnessThreshShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/bloom/brightnessThresh.frag", "");
     mBlurShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/bloom/blur.frag", "");
-    mCompositeShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/bloom/composite.frag", "");
+    mBloomCompositeShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/bloom/composite.frag", "");
     // CRT
     mCRTShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/CRT/CRT.frag", "");
     // Sobel
@@ -370,9 +408,12 @@ void ofxVFX::loadShaders()
     mInvertShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/invert/invert.frag", "");
     // Optical Flow
     mFlowShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/opticalFlow/flow.frag", "");
-    mRenderShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/opticalFlow/render.frag", "");
+    mFlowRenderShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/opticalFlow/render.frag", "");
     // MNCA (Multiple Neighborhoods Cellular Automata)
     mMNCA0Shader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/mnca/mnca0.frag", "");
     mMNCARenderShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/mnca/render.frag", "");
     mMNCACompositeShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/mnca/comosite.frag", "");
+    // Ink
+    mInkShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/ink/ink.frag", "");
+    mInkRenderShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/ink/render.frag", "");
 }

@@ -17,6 +17,7 @@ enum class ofxVFXMode
     CA, // (Chromatic Aberration)
     INVERT,
     MNCA, // (Multiple Neighborhoods Cellular Automata)
+    INK,
     MAX,
 };
 
@@ -60,13 +61,13 @@ private:
     
     // Bloom
     ofFbo mBrightnessThreshFbo, mBlurFbo[2], mCompositeFbo;
-    ofxAutoReloadedShader mBrightnessThreshShader, mBlurShader, mCompositeShader; // share with Optical flow
+    ofxAutoReloadedShader mBrightnessThreshShader, mBlurShader, mBloomCompositeShader; // share with Optical flow
     float mBloomAttenuation, mBlurScale;
     
     // Optical Flow
     ofFbo mBackBuffer; // and used the mBlurFbo[2]
     PingPongBuffer mFlowPingPong;
-    ofxAutoReloadedShader mFlowShader, mRenderShader; // and used the mBlurShader
+    ofxAutoReloadedShader mFlowShader, mFlowRenderShader; // and used the mBlurShader
     float mOpticalThresh, mOpticalScale, mOpticalFade, mOpticalForce, mOpticalAmt;
     
     // CRT
@@ -98,4 +99,9 @@ private:
     int mIsMNCAReset;
 	int mMNCAColorMode;
     ofImage mNoiseTex;
+    
+    // Ink
+    PingPongBuffer mInkPingPong;
+    ofxAutoReloadedShader mInkShader;
+    ofxAutoReloadedShader mInkRenderShader;
 };
