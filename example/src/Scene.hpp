@@ -11,6 +11,7 @@ public:
     void setup(const int width, const int height);
     void update(const float time);
     void draw();
+    void keyPressed(const int key);
     
 private:
     void initGui();
@@ -25,6 +26,8 @@ private:
     vector<ofFloatColor> mColors;
     
     ofxVFX mVFX;
+   
+    bool mIsGui = true;
     
     ofxPanel mGui;
     // Global

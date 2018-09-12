@@ -2,7 +2,7 @@
 
 ## Description
 
-The addon openFrameworks for generating visual effects.
+ofxVFX is an openframeworks addon for visual effects.
 
 ## Environment
 

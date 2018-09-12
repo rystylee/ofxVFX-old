@@ -55,7 +55,14 @@ void Scene::draw()
     mVFX.end();
     mVFX.draw(mWidth, mHeight);
     
-    drawGui();
+    if(mIsGui)
+        drawGui();
+}
+
+void Scene::keyPressed(const int key)
+{
+    if(key == 'g')
+        mIsGui = !mIsGui;
 }
 
 // --------------------------------------------------------------
