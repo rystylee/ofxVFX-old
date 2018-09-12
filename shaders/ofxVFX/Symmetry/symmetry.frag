@@ -1,4 +1,4 @@
-#version 400
+#version 410
 precision mediump float;
 
 in vec4 vPosition;
@@ -7,9 +7,7 @@ out vec4 fragColor;
 
 uniform sampler2DRect uBase;
 uniform vec2 uResolution;
-
-// 0 == verticel, 1 == horizon1tal
-const int direction = 1;
+uniform int uDirection; // 0 == verticel, 1 == horizon1tal
 
 void main()
 {
@@ -18,7 +16,7 @@ void main()
     // to -1.0 ~ 1.0
     vec2 UV = (uv.xy * 2.0 - uResolution.xy) / min(uResolution.x, uResolution.y);
     
-    if(direction == 0)
+    if(uDirection == 0)
     {
         if(UV.x > 0.0) UV.x = - UV.x;
     }

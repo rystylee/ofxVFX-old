@@ -1,4 +1,4 @@
-#version 400
+#version 410
 precision mediump float;
 
 in vec4 vPosition;
@@ -13,7 +13,10 @@ uniform float uRandVal;
 // reference : https://www.shadertoy.com/view/4dsGDn
 // ------------------------------------------------------
 
-float hash(in float n) { return fract(sin(n) * 43758.5453123); }
+float hash(in float n)
+{
+    return fract(sin(n) * 43758.5453123);
+}
 
 void main()
 {

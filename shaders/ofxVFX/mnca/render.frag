@@ -1,4 +1,4 @@
-#version 400
+#version 410
 precision highp float;
 
 in vec4 vPosition;
@@ -38,8 +38,7 @@ void main()
     vec3 color = vec3(0);
     
     int uIsOnlyMNCA = 1;
-    int uColorMode = 2;
-    
+
     if(uIsOnlyMNCA == 0)
     {
         // mnca + base color

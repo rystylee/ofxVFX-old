@@ -1,4 +1,4 @@
-#version 400
+#version 410
 precision mediump float;
 
 in vec2 vTexCoord;
@@ -15,8 +15,10 @@ void main()
     vec2 uv = vTexCoord.xy;
     
     vec2 sampleOffset;
-    if(uDirection == 0) sampleOffset = vec2(1.0, 0.0); // horizontal
-    else sampleOffset = vec2(0.0, 1.0); // vertical
+    if(uDirection == 0)  // horizontal
+        sampleOffset = vec2(1.0, 0.0);
+    else  // vertical
+        sampleOffset = vec2(0.0, 1.0);
     sampleOffset *= uOffsetScale;
     
     vec3 sum = vec3(0.0, 0.0, 0.0);

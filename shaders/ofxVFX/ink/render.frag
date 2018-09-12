@@ -1,4 +1,4 @@
-#version 400 core
+#version 410
 precision highp float;
 
 uniform sampler2DRect uResult;

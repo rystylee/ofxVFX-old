@@ -2,7 +2,6 @@
 
 #include "ofMain.h"
 #include "PingPongBuffer.hpp"
-#include "ofxAutoReloadedShader.h"
 
 enum class ofxVFXMode
 {
@@ -25,29 +24,45 @@ class ofxVFX
 {
 public:
     ofxVFX();
-    void setup(const int w, const int h);
+    void setup(const int width, const int height);
     void update(const float t);
     void bang();
     void begin();
     void end();
-    void draw();
+    void draw(const float width, const float height);
 
     // Setter
     inline void setGlobalColor(const ofFloatColor& color) { mGlobalColor = color; }
     inline void setVFXMode(const ofxVFXMode mode) { mMode = mode; }
-    inline void setBloomAttenuation(const float attenuation) { mBloomAttenuation = attenuation; }
+    // Blur
     inline void setBlurScale(const float blurScale) { mBlurScale = blurScale; }
+    // Bloom
+    inline void setBloomAttenuation(const float attenuation) { mBloomAttenuation = attenuation; }
+    // Optical Flow
     inline void setOpticalThresh(const float opticalThresh) { mOpticalThresh = opticalThresh; }
     inline void setOpticalScale(const float opticalScale) { mOpticalScale = opticalScale; }
     inline void setOpticalFade(const float opticalFade) { mOpticalFade = opticalFade; }
     inline void setOpticalForce(const float opticalForce) { mOpticalForce = opticalForce; }
     inline void setOpticalAmt(const float opticalAmt) { mOpticalAmt = opticalAmt; }
+    // CRT
+    inline void setCRTDirection(const int CRTDirection) { mCRTDirection = CRTDirection; }
+    inline void setCRTPixelSize(const float CRTPixelSize) { mCRTPixelSize = CRTPixelSize; }
+    // Symmetry
+    inline void setSymmetryDirection(const int symmetryDirection) { mSymmetryDirection = symmetryDirection; }
+    // Streak
+    inline void setIsStreakAdd(const int isStreakAdd) { mIsStreakAdd = isStreakAdd; }
+    inline void setIsStreakTwist(const int isStreakTwist) { mIsStreakTwist = isStreakTwist; }
+    inline void setStreakScalex(const float streakScalex) { mStreakScalex = streakScalex; }
+    inline void setStreakScaley(const float streakScaley) { mStreakScaley = streakScaley; }
+    inline void setStreakSpeed(const float streakSpeed) { mStreakSpeed = streakSpeed; }
+    // MNCA
 	inline void setMNCAColorMode(const int colorMode) { mMNCAColorMode = colorMode;  }
     
-    static const int NUM_VFX_MODES = static_cast<int>(ofxVFXMode::MAX);
+    // Getter
+    inline const int getNumVFXMode() { return static_cast<int>(ofxVFXMode::MAX); }
     
 private:
-    void initFbos();
+    void initBuffers();
     void loadShaders();
 
     ofxVFXMode mMode;
@@ -61,40 +76,48 @@ private:
     
     // Bloom
     ofFbo mBrightnessThreshFbo, mBlurFbo[2], mCompositeFbo;
-    ofxAutoReloadedShader mBrightnessThreshShader, mBlurShader, mBloomCompositeShader; // share with Optical flow
+    ofShader mBrightnessThreshShader, mBlurShader, mBloomCompositeShader; // share with Optical flow
     float mBloomAttenuation, mBlurScale;
     
     // Optical Flow
-    ofFbo mBackBuffer; // and used the mBlurFbo[2]
+    ofFbo mBackBuffer; // and use the mBlurFbo[2]
     PingPongBuffer mFlowPingPong;
-    ofxAutoReloadedShader mFlowShader, mFlowRenderShader; // and used the mBlurShader
+    ofShader mFlowShader, mFlowRenderShader; // and used the mBlurShader
     float mOpticalThresh, mOpticalScale, mOpticalFade, mOpticalForce, mOpticalAmt;
     
     // CRT
-    ofxAutoReloadedShader mCRTShader;
+    ofShader mCRTShader;
+    int mCRTDirection;
+    float mCRTPixelSize;
     
     // Sobel
-    ofxAutoReloadedShader mSobelShader;
+    ofShader mSobelShader;
     
     // Symmetry
-    ofxAutoReloadedShader mSymmetryShader;
+    ofShader mSymmetryShader;
+    int mSymmetryDirection;
     
     // Streak
-    ofxAutoReloadedShader mStreakShader;
+    ofShader mStreakShader;
+    int mIsStreakAdd;
+    int mIsStreakTwist;
+    float mStreakScalex;
+    float mStreakScaley;
+    float mStreakSpeed;
     
     // NoiseWarp
-    ofxAutoReloadedShader mNoiseWarpShader;
+    ofShader mNoiseWarpShader;
     
     // CA (Chromatic Aberration)
-    ofxAutoReloadedShader mCAShader;
+    ofShader mCAShader;
     
     // Invert
-    ofxAutoReloadedShader mInvertShader;
+    ofShader mInvertShader;
     
     // MNCA (Multiple Neighborhoods Cellular Automata)
-    ofxAutoReloadedShader mMNCA0Shader;
-    ofxAutoReloadedShader mMNCARenderShader;
-    ofxAutoReloadedShader mMNCACompositeShader;
+    ofShader mMNCA0Shader;
+    ofShader mMNCARenderShader;
+    ofShader mMNCACompositeShader;
     PingPongBuffer mMNCAPingPong;
     int mIsMNCAReset;
 	int mMNCAColorMode;
@@ -102,6 +125,6 @@ private:
     
     // Ink
     PingPongBuffer mInkPingPong;
-    ofxAutoReloadedShader mInkShader;
-    ofxAutoReloadedShader mInkRenderShader;
+    ofShader mInkShader;
+    ofShader mInkRenderShader;
 };

@@ -1,14 +1,18 @@
 #include "ofxVFX.h"
 
+// --------------------------------------------------------------
+// Public
+// --------------------------------------------------------------
+
 ofxVFX::ofxVFX()
 : mMode(ofxVFXMode::NONE), mGlobalColor(1.0), mBloomAttenuation(1.0), mBlurScale(1.0)
-, mOpticalThresh(0.5), mOpticalScale(5.0), mOpticalFade(0.99), mOpticalForce(0.6), mOpticalAmt(1.0), mIsMNCAReset(0), mMNCAColorMode(0)
+, mOpticalThresh(0.5), mOpticalScale(5.0), mOpticalFade(0.99), mOpticalForce(0.6), mOpticalAmt(1.0), mIsMNCAReset(0), mCRTDirection(0), mCRTPixelSize(4.0), mSymmetryDirection(0), mIsStreakAdd(0), mIsStreakTwist(1), mStreakScalex(0.01), mStreakScaley(0.0), mStreakSpeed(7.0), mMNCAColorMode(0)
 {}
 
-void ofxVFX::setup(const int w, const int h)
+void ofxVFX::setup(const int width, const int height)
 {
-    mWidth = w; mHeight = h;
-    initFbos();
+    mWidth = width; mHeight = height;
+    initBuffers();
     loadShaders();
     mNoiseTex.load("textures/ofxVFX/mnca/noise.png");
 }
@@ -167,6 +171,8 @@ void ofxVFX::end()
             ofClear(0);
             mCRTShader.begin();
             mCRTShader.setUniformTexture("uBase", mBaseFbo.getTexture(), 0);
+            mCRTShader.setUniform1i("uDirection", mCRTDirection);
+            mCRTShader.setUniform1f("uPixelSize", mCRTPixelSize);
             ofDrawRectangle(0, 0, mWidth, mHeight);
             mCRTShader.end();
             mEffectFbo.end();
@@ -190,6 +196,7 @@ void ofxVFX::end()
             mSymmetryShader.begin();
             mSymmetryShader.setUniformTexture("uBase", mBaseFbo.getTexture(), 0);
             mSymmetryShader.setUniform2f("uResolution", mWidth, mHeight);
+            mSymmetryShader.setUniform1i("uDirection", mSymmetryDirection);
             ofDrawRectangle(0, 0, mWidth, mHeight);
             mSymmetryShader.end();
             mEffectFbo.end();
@@ -202,6 +209,11 @@ void ofxVFX::end()
             mStreakShader.begin();
             mStreakShader.setUniformTexture("uBase", mBaseFbo.getTexture(), 0);
             mStreakShader.setUniform1f("uTime", mTime);
+            mStreakShader.setUniform1i("uIsAdd", mIsStreakAdd);
+            mStreakShader.setUniform1i("uIsTwist", mIsStreakTwist);
+            mStreakShader.setUniform1f("uScalex", mStreakScalex);
+            mStreakShader.setUniform1f("uScaley", mStreakScaley);
+            mStreakShader.setUniform1f("uSpeed", mStreakSpeed);
             mStreakShader.setUniform4f("uColor", mGlobalColor);
             ofDrawRectangle(0, 0, mWidth, mHeight);
             mStreakShader.end();
@@ -314,12 +326,16 @@ void ofxVFX::end()
     }
 }
 
-void ofxVFX::draw()
+void ofxVFX::draw(const float width, const float height)
 {
-    mEffectFbo.draw(0, 0, mWidth, mHeight);
+    mEffectFbo.draw(0, 0, width, height);
 }
 
-void ofxVFX::initFbos()
+// --------------------------------------------------------------
+// Private
+// --------------------------------------------------------------
+
+void ofxVFX::initBuffers()
 {
     mBaseFbo.allocate(mWidth, mHeight, GL_RGBA16F);
 //    mBaseFbo.getTexture().getTextureData().bFlipTexture = true;
@@ -389,31 +405,30 @@ void ofxVFX::initFbos()
 void ofxVFX::loadShaders()
 {
     // Bloom
-    mBrightnessThreshShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/bloom/brightnessThresh.frag", "");
-    mBlurShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/bloom/blur.frag", "");
-    mBloomCompositeShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/bloom/composite.frag", "");
+    mBrightnessThreshShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/bloom/brightnessThresh.frag");
+    mBlurShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/bloom/blur.frag");
+    mBloomCompositeShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/bloom/composite.frag");
     // CRT
-    mCRTShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/CRT/CRT.frag", "");
+    mCRTShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/CRT/CRT.frag");
     // Sobel
-    mSobelShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/sobel/sobel.frag", "");
+    mSobelShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/sobel/sobel.frag");
     // Symmetry
-    mSymmetryShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/symmetry/symmetry.frag", "");
+    mSymmetryShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/symmetry/symmetry.frag");
     // Streak
-    mStreakShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/streak/streak.frag", "");
+    mStreakShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/streak/streak.frag");
     // NoiseWarp
-    mNoiseWarpShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/noiseWarp/noiseWarp.frag", "");
+    mNoiseWarpShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/noiseWarp/noiseWarp.frag");
     // CA (Chromatic Aberration)
-    mCAShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/CA/ca.frag", "");
+    mCAShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/CA/ca.frag");
     // Invert
-    mInvertShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/invert/invert.frag", "");
+    mInvertShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/invert/invert.frag");
     // Optical Flow
-    mFlowShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/opticalFlow/flow.frag", "");
-    mFlowRenderShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/opticalFlow/render.frag", "");
+    mFlowShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/opticalFlow/flow.frag");
+    mFlowRenderShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/opticalFlow/render.frag");
     // MNCA (Multiple Neighborhoods Cellular Automata)
-    mMNCA0Shader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/mnca/mnca0.frag", "");
-    mMNCARenderShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/mnca/render.frag", "");
-    mMNCACompositeShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/mnca/comosite.frag", "");
+    mMNCA0Shader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/MNCA/mnca0.frag");
+    mMNCARenderShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/MNCA/render.frag");
     // Ink
-    mInkShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/ink/ink.frag", "");
-    mInkRenderShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/ink/render.frag", "");
+    mInkShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/ink/ink.frag");
+    mInkRenderShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/ink/render.frag");
 }

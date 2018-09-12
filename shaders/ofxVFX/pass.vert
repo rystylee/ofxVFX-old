@@ -1,17 +1,23 @@
-#version 400
+#version 410
 
-in vec4 color; // oF default
-in vec4 position; // oF default
-in vec4 normal; // oF default
-in vec2 texcoord; // oF default
+// -----------------------------
+// oF default
+// -----------------------------
+in vec4 color;
+in vec4 position;
+in vec4 normal;
+in vec2 texcoord;
 
 out vec4 vColor;
 out vec4 vPosition;
 out vec4 vNormal;
 out vec2 vTexCoord;
 
-uniform mat4 modelViewProjectionMatrix; // oF default
-uniform mat4 modelViewMatrix; // oF default
+// -----------------------------
+// oF default
+// -----------------------------
+uniform mat4 modelViewProjectionMatrix;
+uniform mat4 modelViewMatrix;
 
 void main()
 {
