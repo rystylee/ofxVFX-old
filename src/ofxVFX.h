@@ -17,6 +17,7 @@ enum class ofxVFXMode
     INVERT,
     MNCA, // (Multiple Neighborhoods Cellular Automata)
     INK,
+    ZOOMBLUR,
     MAX,
 };
 
@@ -127,4 +128,7 @@ private:
     PingPongBuffer mInkPingPong;
     ofShader mInkShader;
     ofShader mInkRenderShader;
+    
+    // Zoom Blur
+    ofShader mZoomBlurShader;
 };

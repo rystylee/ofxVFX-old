@@ -21,9 +21,16 @@ void ofxVFX::update(const float t)
 {
     mTime = t;
     
-    mVal1 = 0;
-    mVal2 = 0;
-    mVal3 = 0;
+//    mVal1 = 0;
+//    mVal2 = 0;
+//    mVal3 = 0;
+    
+    if(ofRandom(1.0) > 0.6)
+    {
+        mVal1 = ofRandom(1.0);
+        mVal2 = ofRandom(1.0);
+        mVal3 = ofRandom(1.0);
+    }
 }
 
 void ofxVFX::bang()
@@ -321,6 +328,18 @@ void ofxVFX::end()
             ofDrawRectangle(0, 0, mWidth, mHeight);
             mInkRenderShader.end();
             mEffectFbo.end();
+            break;
+        case ofxVFXMode::ZOOMBLUR:
+            mEffectFbo.begin();
+            ofClear(0);
+            mZoomBlurShader.begin();
+            mZoomBlurShader.setUniformTexture("uBase", mBaseFbo.getTexture(), 0);
+            mZoomBlurShader.setUniform2f("uResolution", mWidth, mHeight);
+            mZoomBlurShader.setUniform1f("uVal1", mVal1);
+            ofDrawRectangle(0, 0, mWidth, mHeight);
+            mZoomBlurShader.end();
+            mEffectFbo.end();
+            break;
         default:
             break;
     }
@@ -431,4 +450,6 @@ void ofxVFX::loadShaders()
     // Ink
     mInkShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/ink/ink.frag");
     mInkRenderShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/ink/render.frag");
+    // Zoom Blur
+    mZoomBlurShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/zoomBlur/zoomBlur.frag");
 }
