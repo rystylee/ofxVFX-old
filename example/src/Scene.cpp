@@ -21,9 +21,7 @@ void Scene::setup(const int width, const int height)
         mColors.emplace_back(ofRandom(1.0), ofRandom(1.0), ofRandom(1.0), 1.0);
     }
     
-    mVFX.setup(mWidth, mHeight);
-    mVFX.setVFXMode(ofxVFXMode::BLOOM);
-    
+    initVFX();
     initGui();
 }
 
@@ -53,7 +51,8 @@ void Scene::draw()
         mCam.end();
     }
     mVFX.end();
-    mVFX.draw(mWidth, mHeight);
+    mVFX.process(mVFXMode);
+    mVFX.draw(0, 0, mWidth, mHeight);
     
     if(mIsGui)
         drawGui();
@@ -69,12 +68,30 @@ void Scene::keyPressed(const int key)
 // Private
 // --------------------------------------------------------------
 
+void Scene::initVFX()
+{
+    mVFX.addPass<ofxVFX::BloomPass>();
+    mVFX.addPass<ofxVFX::OpticalFlowPass>();
+    mVFX.addPass<ofxVFX::CRTPass>();
+    mVFX.addPass<ofxVFX::EdgePass>();
+    mVFX.addPass<ofxVFX::SymmetryPass>();
+    mVFX.addPass<ofxVFX::StreakPass>();
+    mVFX.addPass<ofxVFX::NoiseWarpPass>();
+    mVFX.addPass<ofxVFX::CAPass>();
+    mVFX.addPass<ofxVFX::InvertPass>();
+    mVFX.addPass<ofxVFX::MNCAPass>();
+    mVFX.addPass<ofxVFX::InkPass>();
+    mVFX.addPass<ofxVFX::ZoomBlurPass>();
+    
+    mVFX.generate(mWidth, mHeight);
+}
+
 void Scene::initGui()
 {
     mGui.setup();
     // Global
     mVFXGlobalGroup.setName("VFX Global Control");
-    mVFXGlobalGroup.add(mVFXMode.set("VFX Mode", 0, 0, mVFX.getNumVFXMode() - 1));
+    mVFXGlobalGroup.add(mVFXMode.set("VFX Mode", 0, 0, mVFX.getNumRenderPasses()- 1));
     mGui.add(mVFXGlobalGroup);
     // Blur
     mBlurGroup.setName("Blur Control");
@@ -118,30 +135,30 @@ void Scene::initGui()
 void Scene::updateVFXParams()
 {
     mVFX.update(mTime);
-    mVFX.setVFXMode(static_cast<ofxVFXMode>(static_cast<int>(mVFXMode)));
     // Blur
-    mVFX.setBlurScale(mBlurScale);
+    mVFX.getRenderPassPtr(0)->setBloomBlurScale(mBlurScale);
+    mVFX.getRenderPassPtr(1)->setBloomBlurScale(mBlurScale);
     // Bloom
-    mVFX.setBloomAttenuation(mBloomAttenuation);
+    mVFX.getRenderPassPtr(0)->setBloomAttenuation(mBloomAttenuation);
     // Optical Flow
-    mVFX.setOpticalThresh(mOpticalThresh);
-    mVFX.setOpticalScale(mOpticalScale);
-    mVFX.setOpticalFade(mOpticalFade);
-    mVFX.setOpticalForce(mOpticalForce);
-    mVFX.setOpticalAmt(mOpticalAmt);
+    mVFX.getRenderPassPtr(1)->setOpticalThresh(mOpticalThresh);
+    mVFX.getRenderPassPtr(1)->setOpticalScale(mOpticalScale);
+    mVFX.getRenderPassPtr(1)->setOpticalFade(mOpticalFade);
+    mVFX.getRenderPassPtr(1)->setOpticalForce(mOpticalForce);
+    mVFX.getRenderPassPtr(1)->setOpticalAmt(mOpticalAmt);
     // CRT
-    mVFX.setCRTDirection(mCRTDirection);
-    mVFX.setCRTPixelSize(mCRTPixelSize);
+    mVFX.getRenderPassPtr(2)->setCRTDirection(mCRTDirection);
+    mVFX.getRenderPassPtr(2)->setCRTPixelSize(mCRTPixelSize);
     // Symmetry
-    mVFX.setSymmetryDirection(mSymmetryDirection);
+    mVFX.getRenderPassPtr(4)->setSymmetryDirection(mSymmetryDirection);
     // Streak
-    mVFX.setIsStreakAdd(mIsStreakAdd);
-    mVFX.setIsStreakTwist(mIsStreakTwist);
-    mVFX.setStreakScalex(mStreakScalex);
-    mVFX.setStreakScaley(mStreakScaley);
-    mVFX.setStreakSpeed(mStreakSpeed);
+    mVFX.getRenderPassPtr(5)->setIsStreakAdd(mIsStreakAdd);
+    mVFX.getRenderPassPtr(5)->setIsStreakTwist(mIsStreakTwist);
+    mVFX.getRenderPassPtr(5)->setStreakScalex(mStreakScalex);
+    mVFX.getRenderPassPtr(5)->setStreakScaley(mStreakScaley);
+    mVFX.getRenderPassPtr(5)->setStreakSpeed(mStreakSpeed);
     // MNCA
-    mVFX.setMNCAColorMode(mMNCAColorMode);
+    mVFX.getRenderPassPtr(9)->setMNCAColorMode(mMNCAColorMode);
 }
 
 void Scene::drawGui()

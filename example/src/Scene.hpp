@@ -14,6 +14,7 @@ public:
     void keyPressed(const int key);
     
 private:
+    void initVFX();
     void initGui();
     void updateVFXParams();
     void drawGui();
@@ -25,7 +26,8 @@ private:
     vector<glm::vec3> mPositions;
     vector<ofFloatColor> mColors;
     
-    ofxVFX mVFX;
+    ofxVFX::VFX mVFX;
+    vector<string> mVFXRenderPassNames;
    
     bool mIsGui = true;
     

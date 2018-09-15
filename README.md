@@ -32,11 +32,23 @@ int main()
 ofxVFX mVFX;
 ``````````
 
-* In your `setup()` function setup the `ofxVFX` class width screen resolution and then set the effect mode.
+* In your `setup()` function, call `mVFX.addPass<ofxVFX::RenderPass>()` to add the effect pass and then call `mVFX.generate(width, height)` to setup each effect.
 
 ``````````
-mVFX.setup(mWidth, mHeight);
-mVFX.setVFXMode(ofxVFXMode::BLOOM);
+mVFX.addPass<ofxVFX::BloomPass>();
+mVFX.addPass<ofxVFX::OpticalFlowPass>();
+mVFX.addPass<ofxVFX::CRTPass>();
+mVFX.addPass<ofxVFX::EdgePass>();
+mVFX.addPass<ofxVFX::SymmetryPass>();
+mVFX.addPass<ofxVFX::StreakPass>();
+mVFX.addPass<ofxVFX::NoiseWarpPass>();
+mVFX.addPass<ofxVFX::CAPass>();
+mVFX.addPass<ofxVFX::InvertPass>();
+mVFX.addPass<ofxVFX::MNCAPass>();
+mVFX.addPass<ofxVFX::InkPass>();
+mVFX.addPass<ofxVFX::ZoomBlurPass>();
+
+mVFX.generate(width, height);
 ``````````
 
 * You have to call `mVFX.update(time)` function in rendering loop to update effects.
@@ -55,17 +67,24 @@ mVFX.begin();
 mVFX.end();
 ``````````
 
-* Call `mVFX.draw(width, height)` in your `draw()` function.
+* Call `mVFX.draw(0, 0, width, height)` in your `draw()` function.
 
 ``````````
 void draw()
 {
-    mVFX.draw(width, height);
+    mVFX.draw(0, 0, width, height);
 }
 ``````````
 
 * You can change effect parameters like below. Check the example for more info!
 
 ``````````
-mVFX.setBlurScale(2.0);
+// Bloom
+mVFX.getRenderPassPtr(int renderPassIndex)->setBloomBlurScale(mBlurScale);
 ``````````
+
+## Reference
+
+* [neilmendoza/ofxPostProcessing](https://github.com/neilmendoza/ofxPostProcessing)
+
+* [nama-gatsuo/ofxDeferredShading](https://github.com/nama-gatsuo/ofxDeferredShading)
