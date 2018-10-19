@@ -8,20 +8,19 @@ out vec4 fragColor;
 
 uniform sampler2DRect uPrevBuffer;
 uniform sampler2DRect uNoiseTex;
+uniform vec2 uResolution;
 uniform int uIsReset;
 
 // --------------------------------------------------
 // https://github.com/SyntheticSearchSpace/WebGL-Automata
 // --------------------------------------------------
 
-float cv(float fx, float fy)
+float cv(in float fx, in float fy)
 {
     vec2 v = vec2(fx, fy);
     float o = texture(uPrevBuffer, (vPosition.xy + v)).r;
-    if(o > 0.0)
-        return 1.0;
-    else
-        return 0.0;
+    
+    return (o > 0.0) ? 1.0 : 0.0;
 }
 
 float rand(vec2 co)
@@ -31,7 +30,11 @@ float rand(vec2 co)
 
 void main()
 {
-    vec2 uv = vTexCoord.xy;
+//    vec2 uv = gl_FragCoord.xy / uResolution;
+//    vec2 uv = vTexCoord.st / uResolution;
+    vec2 uv = vTexCoord.st;
+//    vec2 uv = vPosition.xy / uResolution;
+//    vec2 uv = vPosition.xy;
     
     float outval=cv(0.0,0.0);
     float nhd0=cv(-3.0,-1.0)+cv(-3.0,0.0)+cv(-3.0,1.0)+cv(-2.0,-2.0)+cv(-2.0,2.0)+cv(-1.0,-3.0)+cv(-1.0,-1.0)+cv(-1.0,0.0)+cv(-1.0,1.0)+cv(-1.0,3.0)+cv(0.0,-3.0)+cv(0.0,-1.0)+cv(0.0,1.0)+cv(0.0,3.0)+cv(1.0,-3.0)+cv(1.0,-1.0)+cv(1.0,0.0)+cv(1.0,1.0)+cv(1.0,3.0)+cv(2.0,-2.0)+cv(2.0,2.0)+cv(3.0,-1.0)+cv(3.0,0.0)+cv(3.0,1.0);
@@ -78,5 +81,6 @@ void main()
     {
         color = vec4(vec3(outval, clamp(fin_0, 0, 1), clamp(fin_1, 0, 1)), 1.0);
     }
-    fragColor = color;
+    fragColor.rgb = color.rgb;
+    fragColor.a   = 1.0;
 }

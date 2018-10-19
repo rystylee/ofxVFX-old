@@ -8,10 +8,10 @@
 
 namespace ofxVFX
 {
-    class NoiseWarpPass : public BaseRenderPass
+    class DistortionPass : public BaseRenderPass
     {
     public:
-        NoiseWarpPass();
+        DistortionPass();
         void setup(const int width, const int height) override;
         void update(const float time) override;
         ofFbo& process(ofFbo& base) override;
@@ -26,7 +26,6 @@ namespace ofxVFX
         
         float mTime;
         
-        ofShader mNoiseWarpShader;
-        float mVal1, mVal2;
+        ofShader mDistortionShader;
     };
 }

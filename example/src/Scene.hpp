@@ -41,22 +41,9 @@ private:
     // Bloom
     ofParameterGroup mBloomGroup;
     ofParameter<float> mBloomAttenuation;
-    // Optical Flow
-    ofParameterGroup mOpticalGroup;
-    ofParameter<float> mOpticalThresh;
-    ofParameter<float> mOpticalScale;
-    ofParameter<float> mOpticalFade;
-    ofParameter<float> mOpticalForce;
-    ofParameter<float> mOpticalAmt;
-    // CRT
-    ofParameterGroup mCRTGroup;
-    ofParameter<int> mCRTDirection;
-    ofParameter<float> mCRTPixelSize;
-    // Symmetry
-    ofParameterGroup mSymmetryGroup;
-    ofParameter<int> mSymmetryDirection;
     // Streak
     ofParameterGroup mStreakGroup;
+    ofParameter<ofFloatColor> mStreakColor;
     ofParameter<bool> mIsStreakAdd;
     ofParameter<bool> mIsStreakTwist;
     ofParameter<float> mStreakScalex;

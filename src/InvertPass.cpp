@@ -22,9 +22,10 @@ void InvertPass::update(const float time)
 ofFbo& InvertPass::process(ofFbo& baseFbo)
 {
     mEffectFbo.begin();
-    ofClear(0);
+    ofClear(0, 255);
     mInvertShader.begin();
     mInvertShader.setUniformTexture("uBase", baseFbo.getTexture(), 0);
+    mInvertShader.setUniform2f("uResolution", mWidth, mHeight);
     ofDrawRectangle(0, 0, mWidth, mHeight);
     mInvertShader.end();
     mEffectFbo.end();

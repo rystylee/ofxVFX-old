@@ -26,7 +26,7 @@ namespace ofxVFX
     private:
         void initBuffers();
         void loadShaders();
-        
+
         int mWidth, mHeight;
         ofFbo mEffectFbo;
         

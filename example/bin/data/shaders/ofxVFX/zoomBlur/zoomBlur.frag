@@ -5,7 +5,7 @@ in vec4 vPosition;
 
 out vec4 fragColor;
 
-uniform sampler2DRect uBase;
+uniform sampler2D uBase;
 uniform vec2 uResolution;
 uniform float uVal1;
 
@@ -22,9 +22,9 @@ float random(vec3 scale, float seed)
 
 void main()
 {
-    vec2 uv = vPosition.xy;
+    vec2 uv = gl_FragCoord.xy / uResolution;
     
-    vec2 center = vec2(uResolution * 0.5);
+    vec2 center = vec2(0.5);
     vec3 destColor = vec3(0.0);
     float rand = random(vec3(12.9898, 78.233, 151.7182), 0.0);
     vec2 centerOffset = uv - center;

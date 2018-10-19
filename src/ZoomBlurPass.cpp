@@ -29,7 +29,7 @@ void ZoomBlurPass::update(const float time)
 ofFbo& ZoomBlurPass::process(ofFbo& baseFbo)
 {
     mEffectFbo.begin();
-    ofClear(0);
+    ofClear(0, 255);
     mZoomBlurShader.begin();
     mZoomBlurShader.setUniformTexture("uBase", baseFbo.getTexture(), 0);
     mZoomBlurShader.setUniform2f("uResolution", mWidth, mHeight);

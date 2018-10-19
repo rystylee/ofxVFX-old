@@ -17,7 +17,6 @@ out vec2 vTexCoord;
 // oF default
 // -----------------------------
 uniform mat4 modelViewProjectionMatrix;
-uniform mat4 modelViewMatrix;
 
 void main()
 {

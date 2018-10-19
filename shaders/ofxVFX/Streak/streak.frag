@@ -7,7 +7,7 @@ in vec4 vPosition;
 
 out vec4 fragColor;
 
-uniform sampler2DRect uBase;
+uniform sampler2D uBase;
 uniform vec2 uResolution;
 uniform float uTime;
 uniform int uIsAdd;
@@ -19,16 +19,16 @@ uniform vec4 uColor;
 
 void main()
 {
-    vec2 uv = vPosition.xy;
+    vec2 uv = gl_FragCoord.xy / uResolution;
     
     vec4 col = texture(uBase, uv);
     
     vec3 noise = vec3(uScalex, uScaley, uTime * uSpeed);
-    float n = snoise(vec3(noise.x * uv.x, noise.y * uv.y, noise.z)); // -1 ~ 1
+    float n = snoise(vec3(noise.x * gl_FragCoord.x, noise.y * gl_FragCoord.y, noise.z)); // -1 ~ 1
 
     if(uIsTwist != 0)
     {
-        col = texture(uBase, uv + n * 100);
+        col = texture(uBase, uv + n * 0.01);
     }
     else
     {

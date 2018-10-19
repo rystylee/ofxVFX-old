@@ -25,9 +25,10 @@ void StreakPass::update(const float time)
 ofFbo& StreakPass::process(ofFbo& baseFbo)
 {
     mEffectFbo.begin();
-    ofClear(0);
+    ofClear(0, 255);
     mStreakShader.begin();
     mStreakShader.setUniformTexture("uBase", baseFbo.getTexture(), 0);
+    mStreakShader.setUniform2f("uResolution", mWidth, mHeight);
     mStreakShader.setUniform1f("uTime", mTime);
     mStreakShader.setUniform1i("uIsAdd", static_cast<int>(mIsStreakAdd));
     mStreakShader.setUniform1i("uIsTwist", static_cast<int>(mIsStreakTwist));

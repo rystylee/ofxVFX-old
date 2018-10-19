@@ -5,7 +5,8 @@ in vec4 vPosition;
 
 out vec4 fragColor;
 
-uniform sampler2DRect uBase;
+uniform sampler2D uBase;
+uniform vec2 uResolution;
 uniform float uTime;
 uniform float uRandVal;
 
@@ -20,7 +21,8 @@ float hash(in float n)
 
 void main()
 {
-    vec2 uv = vPosition.xy;
+//    vec2 uv = vPosition.xy;
+    vec2 uv = gl_FragCoord.xy;
     
     float t = pow((((1.0 + sin(uTime * 10.0) * 0.5)
                     * 0.8 + sin(uTime * cos(uv.y) * 41415.92653) * 0.0125)
@@ -31,9 +33,9 @@ void main()
     else
         t = -t;
 
-    vec4 c1 = texture(uBase, uv + vec2(t * 0.2, 0.0));
-    vec4 c2 = texture(uBase, uv + vec2(t * 0.5, 0.0));
-    vec4 c3 = texture(uBase, uv + vec2(t * 0.9, 0.0));
+    vec4 c1 = texture(uBase, (uv + vec2(t * 0.2, 0.0)) / uResolution);
+    vec4 c2 = texture(uBase, (uv + vec2(t * 0.5, 0.0)) / uResolution);
+    vec4 c3 = texture(uBase, (uv + vec2(t * 0.9, 0.0)) / uResolution);
 
     float noise = hash((hash(uv.x) + uv.t) * uTime) * 0.055;
 

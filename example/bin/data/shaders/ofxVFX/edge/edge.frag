@@ -5,7 +5,8 @@ in vec4 vPosition;
 
 out vec4 fragColor;
 
-uniform sampler2DRect uBase;
+uniform sampler2D uBase;
+uniform vec2 uResolution;
 
 // ------------------------------------------------------
 // reference : https://www.shadertoy.com/view/Xdf3Rf
@@ -46,10 +47,11 @@ vec3 sobel(in float stepx, in float stepy, in vec2 uv)
 
 void main()
 {
-    vec2 uv = vPosition.xy;
+//    vec2 uv = vPosition.xy;
+    vec2 uv = gl_FragCoord.xy / uResolution;
 
-    float step = 1.0;
-    vec3 color = sobel(step, step, uv);
+    vec2 step = vec2(1.0 / uResolution);
+    vec3 color = sobel(step.x, step.y, uv);
     
     vec3 c = texture(uBase, uv).rgb;
 //    fragColor = vec4(vec3(color.r, color.r, 0) + c, 1.0);

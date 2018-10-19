@@ -6,11 +6,14 @@ in vec2 vTexCoord;
 
 out vec4 fragColor;
 
-uniform sampler2DRect tex;
+uniform sampler2D tex;
+uniform vec2 uResolution;
 uniform float uBrightnessThresh;
 
 void main()
 {
-    vec4 color = texture(tex, vTexCoord.xy);
+    vec2 uv = gl_FragCoord.xy / uResolution;
+    
+    vec4 color = texture(tex, uv);
     fragColor = max(color - vec4(vec3(uBrightnessThresh), 0.0), vec4(0.0));
 }

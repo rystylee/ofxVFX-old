@@ -7,9 +7,11 @@ using namespace ofxVFX;
 // --------------------------------------------------------------
 
 MNCAPass::MNCAPass()
-: mMNCAColorMode(0)
+: mIsMNCAReset(0), mMNCAColorMode(0)
 {
+//    ofDisableArbTex();
     mNoiseTex.load("textures/ofxVFX/mnca/noise.png");
+//    ofEnableArbTex();
 }
 
 void MNCAPass::setup(const int width, const int height)
@@ -29,7 +31,7 @@ ofFbo& MNCAPass::process(ofFbo& baseFbo)
     if(ofRandom(1.0) < 0.2)
     {
         mMNCAPingPong.dst->begin();
-        ofClear(0);
+        ofClear(0, 255);
         ofPushStyle();
         ofSetColor(255);
         baseFbo.draw(0, 0, mWidth, mHeight);
@@ -39,10 +41,11 @@ ofFbo& MNCAPass::process(ofFbo& baseFbo)
     }
     
     mMNCAPingPong.dst->begin();
-    ofClear(0);
+    ofClear(0, 0);
     mMNCA0Shader.begin();
     mMNCA0Shader.setUniformTexture("uPrevBuffer", mMNCAPingPong.src->getTexture(), 0);
     mMNCA0Shader.setUniformTexture("uNoiseTex", mNoiseTex.getTexture(), 1);
+    mMNCA0Shader.setUniform2i("uResolution", mWidth, mHeight);
     mMNCA0Shader.setUniform1i("uIsReset", mIsMNCAReset);
     mMNCAPingPong.src->draw(0, 0, mWidth, mHeight);
     mMNCA0Shader.end();
@@ -50,7 +53,7 @@ ofFbo& MNCAPass::process(ofFbo& baseFbo)
     mMNCAPingPong.swap();
     
     mEffectFbo.begin();
-    ofClear(0);
+    ofClear(0, 255);
     mMNCARenderShader.begin();
     mMNCARenderShader.setUniformTexture("uSimuTex", mMNCAPingPong.dst->getTexture(), 0);
     mMNCARenderShader.setUniformTexture("uBase", baseFbo.getTexture(), 1);
@@ -77,7 +80,22 @@ void MNCAPass::draw(const float x, const float y, const float width, const float
 
 void MNCAPass::initBuffers()
 {
-    mEffectFbo.allocate(mWidth, mHeight);
+    ofFboSettings s;
+    s.width = mWidth;
+    s.height = mHeight;
+    s.numColorbuffers = 1;
+    s.useDepth = false;
+    s.useStencil = false;
+    s.textureTarget = GL_TEXTURE_2D;
+    s.internalformat = GL_RGBA;
+    s.depthStencilAsTexture = false;
+    s.wrapModeHorizontal = GL_CLAMP_TO_EDGE;
+    s.wrapModeVertical = GL_CLAMP_TO_EDGE;
+    s.minFilter = GL_NEAREST;
+    s.maxFilter = GL_NEAREST;
+    s.numSamples = 0;
+    
+    mEffectFbo.allocate(s);
     
     auto mncaColor = std::make_unique<float[]>(mWidth * mHeight * 3);
     for(int x=0; x<mWidth; x++)
@@ -91,12 +109,12 @@ void MNCAPass::initBuffers()
         }
     }
     mMNCAPingPong.allocate(mWidth, mHeight, GL_RGB32F);
-    mMNCAPingPong.src->getTexture().loadData(mncaColor.get(), mWidth, mHeight, GL_RGB32F);
-    mMNCAPingPong.dst->getTexture().loadData(mncaColor.get(), mWidth, mHeight, GL_RGB32F);
+    mMNCAPingPong.src->getTexture().loadData(mncaColor.get(), mWidth, mHeight, GL_RGB);
+    mMNCAPingPong.dst->getTexture().loadData(mncaColor.get(), mWidth, mHeight, GL_RGB);
 }
 
 void MNCAPass::loadShaders()
 {
-    mMNCA0Shader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/MNCA/mnca0.frag");
-    mMNCARenderShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/MNCA/render.frag");
+    mMNCA0Shader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/mnca/mnca0.frag");
+    mMNCARenderShader.load("shaders/ofxVFX/pass.vert", "shaders/ofxVFX/mnca/render.frag");
 }

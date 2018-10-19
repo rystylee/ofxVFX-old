@@ -18,7 +18,6 @@ namespace ofxVFX
         void update(const float time);
         void begin();
         void end();
-        void process(const int passIndex);
         void draw(const float x, const float y, const float width, const float height);
         
         template<class T>
@@ -26,7 +25,11 @@ namespace ofxVFX
         {
             mRenderPasses.emplace_back(std::make_unique<T>());
         }
-        
+      
+        // Setter
+        inline void setRenderPassIndex(const int renderPassIndex) { mRenderPassIndex = renderPassIndex; }
+
+        // Getter
         BaseRenderPass* getRenderPassPtr(const int renderPassIndex)
         {
             BaseRenderPass* renderPassPtr = mRenderPasses.at(renderPassIndex).get();
@@ -36,7 +39,8 @@ namespace ofxVFX
         int getNumRenderPasses() { return mRenderPasses.size(); }
 
     private:
-        ofFbo mPingFbo, mPongFbo;
+        ofFbo mBaseFbo, mResultFbo;
+        int mRenderPassIndex;
         std::vector<std::unique_ptr<BaseRenderPass>> mRenderPasses;
     };
 }

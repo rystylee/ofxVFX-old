@@ -5,13 +5,14 @@ in vec2 vTexCoord;
 
 out vec4 fragColor;
 
-uniform sampler2DRect tex;
-uniform sampler2DRect uBlur;
+uniform sampler2D tex;
+uniform sampler2D uBlur;
+uniform vec2 uResolution;
 uniform float uGamma;
 
 void main()
 {
-    vec2 uv = vTexCoord.xy;
+    vec2 uv = gl_FragCoord.xy / uResolution;
 
     vec3 hdrColor = texture(tex, uv).rgb;
     vec3 bloomColor = texture(uBlur, uv).rgb;

@@ -5,20 +5,25 @@ in vec2 vTexCoord;
 
 out vec4 fragColor;
 
-uniform sampler2DRect tex;
+uniform sampler2D tex;
+uniform vec2 uResolution;
 uniform int uDirection;
 uniform float uOffsetScale;
 uniform float uAttenuation;
 
 void main()
 {
-    vec2 uv = vTexCoord.xy;
-    
+    vec2 uv = gl_FragCoord.xy / uResolution;
+
     vec2 sampleOffset;
     if(uDirection == 0)  // horizontal
-        sampleOffset = vec2(1.0, 0.0);
+    {
+        sampleOffset = vec2(1.0, 0.0) / uResolution;
+    }
     else  // vertical
-        sampleOffset = vec2(0.0, 1.0);
+    {
+        sampleOffset = vec2(0.0, 1.0) / uResolution;
+    }
     sampleOffset *= uOffsetScale;
     
     vec3 sum = vec3(0.0, 0.0, 0.0);
@@ -43,7 +48,7 @@ void main()
     sum += texture(tex, uv +  +8.0 * sampleOffset).rgb * 0.020595286319257878;
     sum += texture(tex, uv +  +9.0 * sampleOffset).rgb * 0.014053461291849008;
     sum += texture(tex, uv + +10.0 * sampleOffset).rgb * 0.009167927656011385;
-    
+
     sum *= uAttenuation;
-    fragColor = vec4(sum, 1.0); 
+    fragColor = vec4(sum, 1.0);
 }

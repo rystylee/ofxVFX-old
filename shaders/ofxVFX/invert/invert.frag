@@ -5,14 +5,16 @@ in vec4 vPosition;
 
 out vec4 fragColor;
 
-uniform sampler2DRect uBase;
+uniform sampler2D uBase;
 uniform vec2 uResolution;
 uniform float uTime;
 uniform vec4 uColor;
 
 void main()
 {
-    vec2 uv = vPosition.xy;
+//    vec2 uv = vPosition.xy;
+    vec2 uv = gl_FragCoord.xy / uResolution;
+    
     vec4 col = texture(uBase, uv);
     
     col.r = 1.0 - col.r;

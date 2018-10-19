@@ -22,9 +22,10 @@ void EdgePass::update(const float time)
 ofFbo& EdgePass::process(ofFbo& baseFbo)
 {
     mEffectFbo.begin();
-    ofClear(0);
+    ofClear(0, 255);
     mEdgeShader.begin();
     mEdgeShader.setUniformTexture("uBase", baseFbo.getTexture(), 0);
+    mEdgeShader.setUniform2f("uResolution", mWidth, mHeight);
     ofDrawRectangle(0, 0, mWidth, mHeight);
     mEdgeShader.end();
     mEffectFbo.end();

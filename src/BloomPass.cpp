@@ -24,8 +24,9 @@ ofFbo& BloomPass::process(ofFbo& baseFbo)
 {
     // Brightness Threshold Pass
     mBrightnessThreshFbo.begin();
-    ofClear(0);
+    ofClear(0, 255);
     mBrightnessThreshShader.begin();
+    mBrightnessThreshShader.setUniform2f("uResolution", mWidth, mHeight);
     mBrightnessThreshShader.setUniform1f("uBrightnessThresh", 0.3);
     baseFbo.draw(0, 0, mWidth, mHeight);
     mBrightnessThreshShader.end();
@@ -33,8 +34,9 @@ ofFbo& BloomPass::process(ofFbo& baseFbo)
     
     // Vertical Blur Pass
     mBlurFbo[0].begin();
-    ofClear(0);
+    ofClear(0, 255);
     mBlurShader.begin();
+    mBlurShader.setUniform2f("uResolution", mWidth, mHeight);
     mBlurShader.setUniform1i("uDirection", 0);
     mBlurShader.setUniform1f("uOffsetScale", mBlurScale);
     mBlurShader.setUniform1f("uAttenuation", mAttenuation);
@@ -44,8 +46,9 @@ ofFbo& BloomPass::process(ofFbo& baseFbo)
     
     // Horizontal Blur Pass
     mBlurFbo[1].begin();
-    ofClear(0);
+    ofClear(0, 255);
     mBlurShader.begin();
+    mBlurShader.setUniform2f("uResolution", mWidth, mHeight);
     mBlurShader.setUniform1i("uDirection", 1);
     mBlurShader.setUniform1f("uOffsetScale", mBlurScale);
     mBlurShader.setUniform1f("uAttenuation", mAttenuation);
@@ -55,9 +58,10 @@ ofFbo& BloomPass::process(ofFbo& baseFbo)
     
     // Composite Pass
     mCompositeFbo.begin();
-    ofClear(0);
+    ofClear(0, 255);
     mBloomCompositeShader.begin();
     mBloomCompositeShader.setUniformTexture("uBlur", mBlurFbo[1].getTexture(), 1);
+    mBloomCompositeShader.setUniform2f("uResolution", mWidth, mHeight);
     mBloomCompositeShader.setUniform1f("uGamma", 2.2);
     baseFbo.draw(0, 0, mWidth, mHeight);
     mBloomCompositeShader.end();
@@ -65,7 +69,7 @@ ofFbo& BloomPass::process(ofFbo& baseFbo)
     
     // Final
     mEffectFbo.begin();
-    ofClear(0);
+    ofClear(0, 255);
     mCompositeFbo.draw(0, 0, mWidth, mHeight);
     mEffectFbo.end();
     
@@ -83,12 +87,28 @@ void BloomPass::draw(const float x, const float y, const float width, const floa
 
 void BloomPass::initBuffers()
 {
-    mEffectFbo.allocate(mWidth, mHeight, GL_RGBA16F);
+    ofFboSettings s;
+    s.width = mWidth;
+    s.height = mHeight;
+    s.numColorbuffers = 1;
+    s.useDepth = true;
+    s.useStencil = true;
+    s.textureTarget = GL_TEXTURE_2D;
+    s.internalformat = GL_RGBA32F;
+    s.depthStencilAsTexture = true;
+    s.wrapModeHorizontal = GL_CLAMP_TO_EDGE;
+    s.wrapModeVertical = GL_CLAMP_TO_EDGE;
+    s.minFilter = GL_NEAREST;
+    s.maxFilter = GL_NEAREST;
+    s.numSamples = 0;
     
-    mBrightnessThreshFbo.allocate(mWidth, mHeight);
-    mBlurFbo[0].allocate(mWidth, mHeight);
-    mBlurFbo[1].allocate(mWidth, mHeight);
-    mCompositeFbo.allocate(mWidth, mHeight);
+    mEffectFbo.allocate(s);
+    
+    s.internalformat = GL_RGBA;
+    mBrightnessThreshFbo.allocate(s);
+    mBlurFbo[0].allocate(s);
+    mBlurFbo[1].allocate(s);
+    mCompositeFbo.allocate(s);
 }
 
 void BloomPass::loadShaders()
